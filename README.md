@@ -1,6 +1,6 @@
 # Database Setup
 Connect through workbench or any others use this information
-
+connection type: standard TCP
 host = 216.128.148.102
 
 port = 3306
