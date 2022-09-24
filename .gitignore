@@ -2,4 +2,6 @@
 venv
 data
 .DS_Store
-*/__pycache__/*
+L1/Constants/__pycache__/
+L1/ETL/__pycache__/
+L1/__pycache__/
