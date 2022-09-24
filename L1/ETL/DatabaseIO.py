@@ -1,11 +1,11 @@
 import threading
-
-import pandas
+import pandas as pd
 from Utils.MySQLEngine import mysql_engine
 from pandas import DataFrame
+import L1.Constants.FILEPATH as FILEPATH
 
 
-class ETLIO(threading.Thread):
+class DatabaseIO(threading.Thread):
     batch_num = 0
 
     def __init__(self, df: DataFrame, table_name: str, tread_id: int):
@@ -21,15 +21,19 @@ class ETLIO(threading.Thread):
 
 
 def write_to_db(df: DataFrame, table_name: str, threads_num: int):
+    if df.empty:
+        print("Dataframe can not be empty")
+        return
+
     threads = []
     total = len(df)
     batch_size = int(total / threads_num)
     print("Start multi threads writing, batch size is " + str(batch_size))
 
     for i in range(0, threads_num + 1):
-        batch = df.iloc[i*batch_size:min(i*batch_size + batch_size, total)]
+        batch = df.iloc[i * batch_size:min(i * batch_size + batch_size, total)]
         print("writing batch " + str(i))
-        thread = ETLIO(batch, table_name, i)
+        thread = DatabaseIO(batch, table_name, i)
         threads.append(thread)
         thread.start()
         if i == 0:
@@ -40,8 +44,19 @@ def write_to_db(df: DataFrame, table_name: str, threads_num: int):
 
     print("All treads finished!")
 
-
-# TODO: if local pickle exists, read from local
 def read_from_db(table_name: str):
+    pickle_path = FILEPATH.BASE_PATH + "/data/pickles/" + table_name
+    try:
+        return pd.read_pickle(pickle_path)
+    except FileNotFoundError:
+        print("No existing pickle, will try to read from the database")
+
     sql = "select * from " + table_name
-    return pandas.read_sql(sql, mysql_engine.get_connection())
+    print("Using sql: " + sql)
+    print("Reading the database")
+    df = pd.read_sql(sql, mysql_engine.get_connection())
+    print(df.head())
+    print("Creating pickle...")
+    df.to_pickle(pickle_path)
+    print("Finished")
+    return df

@@ -1,6 +1,5 @@
 """
 Data types for files
-Columns that are not list here will be transformed to string
 """
 
 # TODO: for other types that are not clear, cast them to string
