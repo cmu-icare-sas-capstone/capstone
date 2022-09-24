@@ -1,0 +1,3 @@
+import L1.Constants.FILEPATH as FILEPATH
+
+print(FILEPATH.BASE_PATH)
