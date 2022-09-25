@@ -29,6 +29,7 @@ dbio.read_from_db("table_name")
 
 dbio.write_to_db(df, "table_name", threads_num)
 ```
+
 ## Add working directory
 ```python
 import sys

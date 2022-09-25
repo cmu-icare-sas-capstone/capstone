@@ -120,7 +120,7 @@ class DataLoader:
         df = self.format_column_types(df, filename)
 
         print("Writing to the database... table name " + filename)
-        write_to_db(df, filename, int(len(df) / 10000))
+        write_to_db(df, filename, min(int(len(df) / 5000), 100))
         print("Finished!")
 
 
