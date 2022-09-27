@@ -1,8 +1,8 @@
 import threading
 import pandas as pd
-from Utils.MySQLEngine import mysql_engine
+from utils.MySQLEngine import mysql_engine
 from pandas import DataFrame
-import L1.Constants.FILEPATH as FILEPATH
+import l1.constants.FILEPATH as FILEPATH
 from datetime import datetime
 
 class DatabaseIO(threading.Thread):

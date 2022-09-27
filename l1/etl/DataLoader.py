@@ -1,8 +1,8 @@
 import pandas as pd
 
-from L1.Constants import FILEPATH
-from L1.Constants import DTYPES
-from L1.ETL.DatabaseIO import write_to_db
+from l1.constants import FILEPATH
+from l1.constants import DTYPES
+from l1.etl.DatabaseIO import write_to_db
 
 from pandas import DataFrame
 import re

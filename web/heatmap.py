@@ -1,5 +1,5 @@
 import pandas as pd
-import L1.ETL.DatabaseIO as dbio
+import l1.etl.DatabaseIO as dbio
 
 def los_heatmap():
     sql = \
