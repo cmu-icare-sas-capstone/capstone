@@ -1,8 +1,8 @@
 import pandas as pd
 
-from L1.Constants import FILEPATH
-from L1.Constants import DTYPES
-from L1.ETL.DatabaseIO import write_to_db
+from l1.constants import FILEPATH
+from l1.constants import DTYPES
+from l1.etl.DatabaseIO import write_to_db
 
 from pandas import DataFrame
 import re
@@ -60,27 +60,33 @@ class DataLoader:
         add new to the conversion block if needed
     """
 
-    def format_column_types(self, df: DataFrame, filename: str) -> DataFrame:
+    def format_column_types(self, df: DataFrame, filename: str = None, format_types: dict = None) -> DataFrame:
         print("converting data types")
         df = df.convert_dtypes()
 
-        # ------------- conversion block ----------------#
-        if filename == FILEPATH.CMS_Medicare_Cancer_Alley_DATA1_4_:
-            for member in DTYPES.MEDICARE_DTYPES:
-                df[member] = df[member].replace(DataLoader.strange_characters, "", regex=True)
-            df = df.astype(DTYPES.MEDICARE_DTYPES)
+        if filename is not None:
+            # ------------- conversion block - filename ----------------#
+            if filename == FILEPATH.CMS_Medicare_Cancer_Alley_DATA1_4_:
+                for member in DTYPES.MEDICARE_DTYPES:
+                    df[member] = df[member].replace(DataLoader.strange_characters, "", regex=True)
+                df = df.astype(DTYPES.MEDICARE_DTYPES)
 
-        elif filename == FILEPATH.Comorbidities_for_COVID_Synthetic_data:
-            for member in DTYPES.COMORBIDITIES_DTYPES:
-                df[member] = df[member].replace(DataLoader.strange_characters, "", regex=True)
-            df = df.astype(DTYPES.COMORBIDITIES_DTYPES)
+            elif filename == FILEPATH.Comorbidities_for_COVID_Synthetic_data:
+                for member in DTYPES.COMORBIDITIES_DTYPES:
+                    df[member] = df[member].replace(DataLoader.strange_characters, "", regex=True)
+                df = df.astype(DTYPES.COMORBIDITIES_DTYPES)
 
-        elif filename == FILEPATH.Diagnosis_Review:
-            for member in DTYPES.DIAGNOSIS_REVIEW_DTYPES:
+            elif filename == FILEPATH.Diagnosis_Review:
+                for member in DTYPES.DIAGNOSIS_REVIEW_DTYPES:
+                    df[member] = df[member].replace(DataLoader.strange_characters, "", regex=True)
+                df = df.dropna(subset=DTYPES.DIAGNOSIS_REVIEW_DTYPES.keys())
+                df = df.astype(DTYPES.DIAGNOSIS_REVIEW_DTYPES)
+            # ------------- conversion block - filename ----------------#
+        else:
+            for member in format_types:
                 df[member] = df[member].replace(DataLoader.strange_characters, "", regex=True)
-            df = df.dropna(subset=DTYPES.DIAGNOSIS_REVIEW_DTYPES.keys())
-            df = df.astype(DTYPES.DIAGNOSIS_REVIEW_DTYPES)
-        # ------------- conversion block ----------------#
+            df = df.dropna(subset=format_types.keys())
+            df = df.astype(format_types)
 
         print("converting finished")
         print(df.dtypes)

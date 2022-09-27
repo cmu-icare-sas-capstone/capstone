@@ -1,9 +1,9 @@
 import threading
 import pandas as pd
-from Utils.MySQLEngine import mysql_engine
+from utils.MySQLEngine import mysql_engine
 from pandas import DataFrame
-import L1.Constants.FILEPATH as FILEPATH
-
+import l1.constants.FILEPATH as FILEPATH
+from datetime import datetime
 
 class DatabaseIO(threading.Thread):
     batch_num = 0
@@ -44,19 +44,25 @@ def write_to_db(df: DataFrame, table_name: str, threads_num: int):
 
     print("All treads finished!")
 
-def read_from_db(table_name: str):
-    pickle_path = FILEPATH.BASE_PATH + "/data/pickles/" + table_name
-    try:
-        return pd.read_pickle(pickle_path)
-    except FileNotFoundError:
-        print("No existing pickle, will try to read from the database")
+def read_from_db(table_name: str = None, sql: str = None):
+    if table_name is not None:
+        pickle_path = FILEPATH.BASE_PATH + "/data/pickles/" + table_name
+        try:
+            return pd.read_pickle(pickle_path)
+        except FileNotFoundError:
+            print("No existing pickle, will try to read from the database")
 
-    sql = "select * from " + table_name
+        sql = "select * from " + table_name
+
     print("Using sql: " + sql)
     print("Reading the database")
-    df = pd.read_sql(sql, mysql_engine.get_connection())
+    connection = mysql_engine.get_connection()
+    df = pd.read_sql(sql, connection)
+    connection.dispose()
     print(df.head())
-    print("Creating pickle...")
-    df.to_pickle(pickle_path)
-    print("Finished")
+
+    if table_name is not None:
+        print("Creating pickle...")
+        df.to_pickle(pickle_path)
+        print("Finished")
     return df
