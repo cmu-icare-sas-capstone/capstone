@@ -12,9 +12,10 @@ username = root
 password = ?2?QaB%,s?F7A8Jrs/+4bh0^vn1R77pt
 
 # Database IO
+
 ```python
 # under the root of the project
-import L1.ETL.DatabaseIO as dbio
+import l1.etl.DatabaseIO as dbio
 
 # read from the databaase
 dbio.read_from_db("table_name")
@@ -28,4 +29,10 @@ dbio.read_from_db("table_name")
 # threads_num = number of lines of dataframe / 5000
 
 dbio.write_to_db(df, "table_name", threads_num)
+```
+
+## Add working directory
+```python
+import sys
+sys.path.extend(['absolute path'])
 ```
