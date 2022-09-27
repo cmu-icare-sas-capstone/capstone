@@ -3,9 +3,9 @@ import time
 import sys; print('Python %s on %s' % (sys.version, sys.platform))
 sys.path.extend(["/Users/mtong/Documents/project/capstone/"])
 import pandas as pd
-import L1.ETL.DatabaseIO as dbio
-import L1.Constants.FILEPATH as FILEPATH
-from L1.ETL.DataLoader import data_loader
+import l1.etl.DatabaseIO as dbio
+import l1.constants.FILEPATH as FILEPATH
+from l1.etl.DataLoader import data_loader
 import matplotlib
 matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
