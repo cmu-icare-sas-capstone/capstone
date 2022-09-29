@@ -1,7 +1,5 @@
 import time
 
-import sys; print('Python %s on %s' % (sys.version, sys.platform))
-sys.path.extend(["/Users/mtong/Documents/project/capstone/"])
 import pandas as pd
 import l1.etl.DatabaseIO as dbio
 import l1.constants.FILEPATH as FILEPATH
