@@ -27,5 +27,9 @@ def heatmap_los():
         df.at[index, "latitude"] = latitude
         df.at[index, "longitude"] = longitude
 
-    return df
+    data = df.loc[:, ('latitude', 'longitude')]
+    max_los = df["avg_los"].max()
+    min_los = df["avg_los"].min()
+    data["weight"] = (df.loc[:, "avg_los"] - min_los) / (max_los - min_los)
 
+    return data

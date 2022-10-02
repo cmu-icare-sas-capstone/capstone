@@ -1,18 +1,12 @@
-import pandas as pd
-import l1.etl.DatabaseIO as dbio
+import l2.description.Maps as maps
+import folium
+from folium.plugins import HeatMap
+import streamlit.components.v1 as components
+
 
 def los_heatmap():
-    sql = \
-        "select \
-            zip_code_3_digits, \
-            round (avg(length_of_stay),0) as avg_los \
-        from cms_medicare_with_covid_risk \
-        where \
-            covid=1 \
-            and primary_diagnosis = 'COVID-19' \
-            and zip_code_3_digits is not null \
-            and zip_code_3_digits != 'OOS' \
-        group by zip_code_3_digits \
-        order by zip_code_3_digits, avg_los;"
-
-    df = dbio.read_from_db(None, sql)
+    heatmap = maps.heatmap_los()
+    lat, lon = heatmap.loc[0, "latitude"], heatmap.loc[0, "longitude"]
+    m = folium.Map([lat, lon], tiles='cartodbpositron', zoom_start=9)
+    HeatMap(heatmap).add_to(m)
+    components.html(m._repr_html_(), width=700, height=500)

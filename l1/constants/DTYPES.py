@@ -22,3 +22,11 @@ DIAGNOSIS_REVIEW_DTYPES = {
     "covid_hosp": bool,
     "covid": str
 }
+
+FINAL = {
+    "length_of_stay": float,
+    "total_charges": float,
+    "total_costs": float,
+    "primary_adm_diag": bool,
+    "apr_drg_code": int
+}
