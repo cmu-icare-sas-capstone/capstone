@@ -1,3 +1,4 @@
+import pandas
 import pandas as pd
 
 from l1.constants import FILEPATH
@@ -102,26 +103,68 @@ class DataLoader:
             3. reformat columns
             4. write to the database
     """
-    def load(self, absolute_path: str):
-        print("reading file from " + absolute_path)
-        if absolute_path.endswith(".csv"):
-            df = pd.read_csv(filepath_or_buffer=absolute_path, delimiter=",")
-        elif absolute_path.endswith(".xlsx"):
-            df = pd.read_excel(absolute_path)
-        else:
-            raise Exception("file type not supported, it should be csv or excel file")
-        print("reading finished")
+    # def load(self, absolute_path: str):
+    #     print("reading file from " + absolute_path)
+    #     if absolute_path.endswith(".csv"):
+    #         df = pd.read_csv(filepath_or_buffer=absolute_path, delimiter=",")
+    #     elif absolute_path.endswith(".xlsx"):
+    #         df = pd.read_excel(absolute_path)
+    #     else:
+    #         raise Exception("file type not supported, it should be csv or excel file")
+    #     print("reading finished")
+    #
+    #     df = self.format_column_names(df)
+    #     print(df.head(5))
+    #
+    #     filename = self.get_filename_from_path(absolute_path)
+    #     print("get the filename: " + filename)
+    #     df = self.format_column_types(df, filename)
+    #
+    #     print("Writing to the database... table name " + filename)
+    #     write_to_db(df, filename, min(int(len(df) / 5000), 100))
+    #     print("Finished!")
 
+    def load(self, df, table_name):
         df = self.format_column_names(df)
         print(df.head(5))
 
-        filename = self.get_filename_from_path(absolute_path)
-        print("get the filename: " + filename)
-        df = self.format_column_types(df, filename)
+        df = self.format_column_types(df, filename=None, format_types=DTYPES.FINAL)
 
-        print("Writing to the database... table name " + filename)
-        write_to_db(df, filename, min(int(len(df) / 5000), 100))
+        print("Writing to the database... table name " + table_name)
+        write_to_db(df, table_name, min(int(len(df) / 5000), 100))
         print("Finished!")
+
+    def filter(self):
+        df = pandas.read_csv("/Users/mtong/Documents/project/capstone/data/files/hospital_inpatient_discharges_6_5.csv")
+        important_cols = ['Facility Id', 'Age Group', 'Zip Code - 3 digits', 'Gender',
+                          'Race', 'Ethnicity', 'Length of Stay', 'Type of Admission',
+                          'Patient Disposition', 'CCS Diagnosis Code', 'CCS Diagnosis Description',
+                          'APR DRG Code', 'APR DRG Description', 'APR MDC Code',
+                          'APR MDC Description', 'APR Severity of Illness Code',
+                          'APR Severity of Illness Description', 'Payment Typology 1',
+                          'Attending Provider License Number',
+                          'Total Charges', 'Total Costs', 'COUNTY',
+                          'FIPS_Code_x', 'Area_name', 'CDC 2018 Diagnosed Diabetes Percentage',
+                          'CDC 2018 Overall SVI', 'SUM of COUNTUNIQUE of Rndrng_NPI 2019 Physician Other Providers PUF',
+                          'COVID', 'COVID_HOSP', 'PRIMARY_ADM_DIAG', 'LAT', 'LON']
+
+        df1 = df[important_cols]
+
+        ##type of admission value restrictions
+        TOA_list = ['Emergency', 'Urgent', 'Trauma']
+        df1 = df1[df1['Type of Admission'].isin(TOA_list)]
+        ##payment typology 1 value restrictions
+        paytypo_list = ['Federal/State/Local/VA', 'Medicaid', 'Medicare', 'Blue Cross/Blue Shield']
+        df1 = df1[df1['Payment Typology 1'].isin(paytypo_list)]
+
+        # Drop rows where zip codes are missing
+        df1 = df1[df1['Zip Code - 3 digits'].notna()]  ##1041 rows affected
+        df1 = df1[~df1['PRIMARY_ADM_DIAG'].isin(['#REF!'])]
+        df1 = df1[df1['PRIMARY_ADM_DIAG'].notna()]
+        df1 = df1.rename(columns={"SUM of COUNTUNIQUE of Rndrng_NPI 2019 Physician Other Providers PUF": "sum_countunique_rndrng_npi_physician_other_providers"})
+        print(df1.columns)
+        return df1
 
 
 data_loader = DataLoader()
+data_loader.filter()
