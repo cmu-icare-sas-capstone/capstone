@@ -1,7 +1,5 @@
 import time
 
-import sys; print('Python %s on %s' % (sys.version, sys.platform))
-sys.path.extend(["/Users/mtong/Documents/project/capstone/"])
 import pandas as pd
 import l1.etl.DatabaseIO as dbio
 import l1.constants.FILEPATH as FILEPATH
@@ -28,28 +26,28 @@ frequency of los
 # print(df)
 # dbio.write_to_db(df, "ccs_covid_risk", 1)
 
-# df = dbio.read_from_db("cms_medicare_with_covid_risk")
-# print(df[["length_of_stay"]].describe())
-
-group_sql =\
-"select \
-	zip_code_3_digits, \
-    round (avg(length_of_stay),0) as avg_los, \
-    round(avg(total_costs),2) as avg_cost, \
-    round (avg(total_charges),2) as avg_charge \
-from cms_medicare_with_covid_risk \
-where \
-	covid=1 \
-    and primary_diagnosis = 'COVID-19' \
-    and zip_code_3_digits is not null \
-    and zip_code_3_digits != 'OOS' \
-group by zip_code_3_digits \
-order by zip_code_3_digits, avg_los;"
-
-df = dbio.read_from_db(None, group_sql)
-print(df)
-df = df.set_index(["zip_code_3_digits"])
-print(df)
-axes = df.plot.bar(y=["avg_los", "avg_cost", "avg_charge"], subplots=True)
-axes[1].legend(loc=3)
-plt.show()
+df = dbio.read_from_db("cms_medicare_with_covid_risk")
+print(df[["length_of_stay"]].describe())
+df[["length_of_stay"]].describe().to_csv(FILEPATH.BASE_PATH+"/data/los_description.csv")
+# group_sql =\
+# "select \
+# 	zip_code_3_digits, \
+#     round (avg(length_of_stay),0) as avg_los, \
+#     round(avg(total_costs),2) as avg_cost, \
+#     round (avg(total_charges),2) as avg_charge \
+# from cms_medicare_with_covid_risk \
+# where \
+# 	covid=1 \
+#     and primary_diagnosis = 'COVID-19' \
+#     and zip_code_3_digits is not null \
+#     and zip_code_3_digits != 'OOS' \
+# group by zip_code_3_digits \
+# order by zip_code_3_digits, avg_los;"
+#
+# df = dbio.read_from_db(None, group_sql)
+# print(df)
+# df = df.set_index(["zip_code_3_digits"])
+# print(df)
+# axes = df.plot.bar(y=["avg_los", "avg_cost", "avg_charge"], subplots=True)
+# axes[1].legend(loc=3)
+# plt.show()

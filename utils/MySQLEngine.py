@@ -1,7 +1,6 @@
 import sqlalchemy
 from .DBConfiguration import Configuration
 
-
 class MySQLEngine:
     def __init__(self):
         self.database_username = Configuration.username
