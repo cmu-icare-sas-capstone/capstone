@@ -1,1 +1,7 @@
 scikit-learn>=1.1.2
+pandas>=1.5.0
+streamlit>=1.13.0
+folium>=0.12.1.post1
+sqlalchemy>=1.4.41
+mysql-connector-python>=8.0.30
+streamlit-option-menu>=0.3.2
