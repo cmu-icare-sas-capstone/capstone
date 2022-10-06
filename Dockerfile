@@ -4,10 +4,10 @@ FROM python:3.9-slim
 
 EXPOSE 8081
 
-WORKDIR /
+WORKDIR /app
 
-RUN mkdir -p data
-RUN mkdir -p data/pickles
+RUN mkdir -p /app/data
+RUN mkdir -p /app/data/pickles
 
 COPY . .
 
