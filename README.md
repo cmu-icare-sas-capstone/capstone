@@ -1,20 +1,17 @@
-# Database Setup
-Connect through workbench or any others use this information
-connection type: standard TCP
-host = 216.128.148.102
+# Important
+Please check requirements.txt file to install missing packages if there's any. Make sure you update that list when you add new third-party packages.
 
-port = 3306
+These codes add the project capstone path to you working environment (spider, jupiter, etc.), so you can use self created packages that locate in this project. Please change the absolute path to your local capstone path.
+```python
+import sys
+sys.path.extend(['absolute path'])
+```
 
-database = capstone
-
-username = root
-
-password = ?2?QaB%,s?F7A8Jrs/+4bh0^vn1R77pt
-
+Add a folder with name data and a subfolder called pickles under it. After the first read from the database, it will create a zip format dataframe to save some time.
 # Database IO
 
 ```python
-# under the root of the project
+# after you include the project path
 import l1.etl.DatabaseIO as dbio
 
 # read from the databaase
@@ -31,8 +28,15 @@ dbio.read_from_db("table_name")
 dbio.write_to_db(df, "table_name", threads_num)
 ```
 
-## Add working directory
-```python
-import sys
-sys.path.extend(['absolute path'])
-```
+# Database Setup
+Connect through workbench or any others use this information
+connection type: standard TCP
+host = 216.128.148.102
+
+port = 3306
+
+database = capstone
+
+username = root
+
+password = ?2?QaB%,s?F7A8Jrs/+4bh0^vn1R77pt
