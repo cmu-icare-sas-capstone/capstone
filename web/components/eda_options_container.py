@@ -2,6 +2,7 @@ import l2.eda.basic_eda as basic_eda
 import web.graph as graphs
 import streamlit as st
 
+
 def eda_options_container():
     eda_select_box = st.selectbox(
             "EDA Options",
