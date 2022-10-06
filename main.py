@@ -2,7 +2,10 @@
 Main entrance for streamlit
 """
 import streamlit as st
-import web
+from streamlit_option_menu import option_menu
 
-web.heatmap.los_heatmap()
 
+with st.sidebar:
+    selected = option_menu("Main Menu", ["EDA", 'Settings'],
+        icons=['house', 'gear'], menu_icon="cast", default_index=1)
+    selected
