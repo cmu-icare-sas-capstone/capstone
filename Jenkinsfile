@@ -37,7 +37,7 @@ pipeline {
                     
                     try {
                         sh "docker rm capstone"
-                        sh "docker rmi $(docker images --filter "dangling=true" -q --no-trunc)"
+                        sh "docker rmi \$(docker images --filter "dangling=true" -q --no-trunc)"
                     } catch (Exception err) {
                         echo "No container exists, will create one"
                     }
