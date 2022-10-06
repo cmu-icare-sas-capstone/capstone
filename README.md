@@ -7,6 +7,8 @@ import sys
 sys.path.extend(['absolute path'])
 ```
 
+remote server address: http://216.128.148.102:8081/
+
 Add a folder with name data and a subfolder called pickles under it. After the first read from the database, it will create a zip format dataframe to save some time.
 # Database IO
 
