@@ -61,5 +61,3 @@ def eda_options_container():
 
             st.pyplot(fig)
 
-    if eda_select_box == "Covid Risk Factor Comparison":
-
