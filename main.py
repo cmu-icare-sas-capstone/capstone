@@ -3,8 +3,8 @@ Main entrance for streamlit
 """
 import streamlit as st
 from streamlit_option_menu import option_menu
-from web.components.eda_options_container import *
-from web.components.coefficient_pie import plot_pie
+from web.components.eda_options_container import eda_options_container
+from web.components.model_container import model_container
 
 with st.sidebar:
     selected = option_menu("Main Menu", ["EDA", "Model"],
@@ -13,6 +13,6 @@ with st.sidebar:
 if selected == "EDA":
     eda_options_container()
 elif selected == 'Model':
-    plot_pie()
+    model_container()
     
 
