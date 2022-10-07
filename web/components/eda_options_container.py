@@ -1,3 +1,5 @@
+import pandas as pd
+
 import l2.eda.basic_eda as basic_eda
 import matplotlib.pyplot as plt
 import streamlit as st
@@ -6,19 +8,19 @@ import streamlit as st
 def eda_options_container():
     eda_select_box = st.selectbox(
             "EDA Options",
-            options=("Data Point Count", "Box Plot")
+            options=("Basic Info", "Box Plot")
         )
 
     data_counter_container = st.container()
-    if eda_select_box == "Data Point Count":
-        data_counter_container.header("Data Point Count")
+    if eda_select_box == "Basic Info":
+        data_counter_container.header("Basic Info")
         x_col, y_col = st.columns(2)
 
         with data_counter_container:
             with x_col:
                 group = st.selectbox(
                     "Group By",
-                    options=("Age", "Race", "County", "Facility ID", "CCS Diagnosis Description", "Gender", "Covid Risk Factor")
+                    options=("Age", "Race", "County", "Facility ID", "CCS Diagnosis Description", "Gender", "Covid Risk Factor", "LOS")
                 )
 
             with y_col:
@@ -30,11 +32,12 @@ def eda_options_container():
             group_map = {
                 "Age": "age_group",
                 "Race": "race",
-                "County": "county",
+                "County": "area_name",
                 "Facility ID": "facility_id",
                 "CCS Diagnosis Description": "ccs_diagnosis_description",
                 "Gender": "gender",
-                "Covid Risk Factor": "covid_risk_factor"
+                "Covid Risk Factor": "covid_risk_factor",
+                "LOS": "length_of_stay"
             }
             value_map = {
                 "Average LOS": "length_of_stay",
@@ -44,7 +47,11 @@ def eda_options_container():
             if value == "Count":
                 group_df = basic_eda.group_by_count(group_map[group])
             else:
-                group_df = basic_eda.group_by_average(column=group_map[group], value=value_map[value])
+                if group == "LOS" and value == "Average LOS":
+                    group_df = pd.DataFrame()
+                else:
+                    group_df = basic_eda.group_by_average(column=group_map[group], value=value_map[value])
+
             st.bar_chart(data=group_df)
 
     if eda_select_box == "Box Plot":

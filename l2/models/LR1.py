@@ -17,12 +17,12 @@ def model():
     
     # Gender
     gender_male = pd.get_dummies(df['gender'], drop_first=True)
-    df = pd.concat([df.drop(labels=['gender'],axis=1),gender_male],axis=1)
+    df = pd.concat([df.drop(labels=['gender'],axis=1), gender_male], axis=1)
     df.rename(columns={'M': 'gender_male'}, inplace=True)
     
     # Race (4 races)
-    race_encode = pd.get_dummies(df['race'],drop_first=True)
-    df = pd.concat([df.drop(labels=['race'],axis=1),race_encode],axis=1)
+    race_encode = pd.get_dummies(df['race'], drop_first=True)
+    df = pd.concat([df.drop(labels=['race'], axis=1), race_encode], axis=1)
     
     # Age Group (5 age groups)
     # Define a dictionary for encoding target variable
