@@ -10,7 +10,7 @@ import streamlit as st
 import plotly.express as px
 import plotly.graph_objects as go
 
-@st.cache
+# @st.cache
 def plot_pie():
     lr_model, X_train, y_train, X_test, y_pred, lr_features= lr()
     total_coefficnet = lr_model.score(X_train, y_train)
@@ -20,7 +20,7 @@ def plot_pie():
     values = [abs(i) for i in coefficient_array]
     fig = go.Figure(data=[go.Pie(labels=labels, values=values)])
     fig.update_layout(title_text='Coefficients of LR model')
-    fig.show()
+    st.plotly_chart(fig)
 
 
 def main():
