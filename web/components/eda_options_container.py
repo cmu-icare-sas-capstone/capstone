@@ -52,12 +52,17 @@ def eda_options_container():
         with data_counter_container:
             group = st.selectbox(
                 "Column",
-                options=("LOS", "hello")
+                options=("Length Of Stay", "Total Cost")
             )
-            if group == "LOS":
+            if group == "Length Of Stay":
                 group_df = basic_eda.data["length_of_stay"]
                 fig, ax = plt.subplots()
                 ax.boxplot(group_df, showfliers=False)
-
+                
+            if group == "Total Cost":
+                group_df = basic_eda.data["total_costs"]
+                fig, ax = plt.subplots()
+                ax.boxplot(group_df, showfliers=False)
+                
             st.pyplot(fig)
 
