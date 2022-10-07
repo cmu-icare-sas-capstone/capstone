@@ -18,7 +18,7 @@ def eda_options_container():
             with x_col:
                 group = st.selectbox(
                     "Group By",
-                    options=("Age", "Race", "County", "Facility ID", "CCS Diagnosis Description", "Gender")
+                    options=("Age", "Race", "County", "Facility ID", "CCS Diagnosis Description", "Gender", "Covid Risk Factor")
                 )
 
             with y_col:
@@ -33,7 +33,8 @@ def eda_options_container():
                 "County": "county",
                 "Facility ID": "facility_id",
                 "CCS Diagnosis Description": "ccs_diagnosis_description",
-                "Gender": "gender"
+                "Gender": "gender",
+                "Covid Risk Factor": "covid_risk_factor"
             }
             value_map = {
                 "Average LOS": "length_of_stay",
@@ -60,4 +61,5 @@ def eda_options_container():
 
             st.pyplot(fig)
 
+    if eda_select_box == "Covid Risk Factor Comparison":
 
