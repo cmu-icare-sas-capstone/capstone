@@ -3,11 +3,14 @@ import l1.etl.DatabaseIO as dbio
 data = dbio.read_from_db("hospital_inpatient_discharges")
 
 
-def group_by(column: str):
+def group_by_count(column: str):
     group = data.groupby([column]).count()
     group = group["index"]
     group = group.rename("count")
     return group
 
 
-group_by("age_group")
+def group_by_average(column: str, value: str):
+    temp_df = data.loc[:, [column, value]]
+    group = temp_df.groupby([column]).mean()
+    return group
