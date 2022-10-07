@@ -12,25 +12,39 @@ def eda_options_container():
     data_counter_container = st.container()
     if eda_select_box == "Data Point Count":
         data_counter_container.header("Data Point Count")
+        x_col, y_col = st.columns(2)
 
         with data_counter_container:
-            group = st.selectbox(
-                "Group By",
-                options=("Age", "Race", "LOS", "County")
-            )
+            with x_col:
+                group = st.selectbox(
+                    "Group By",
+                    options=("Age", "Race", "County", "Facility ID", "CCS Diagnosis Description", "Gender")
+                )
 
-            if group == "Age":
-                group_df = basic_eda.group_by("age_group")
-                st.bar_chart(data=group_df)
-            elif group == "Race":
-                group_df = basic_eda.group_by("race")
-                st.bar_chart(data=group_df)
-            elif group == "LOS":
-                group_df = basic_eda.group_by("length_of_stay")
-                st.bar_chart(data=group_df)
-            elif group == "County":
-                group_df = basic_eda.group_by("county")
-                st.bar_chart(data=group_df)
+            with y_col:
+                value = st.selectbox(
+                    "y-axis",
+                    options=("Count", "Average LOS", "Average Cost")
+                )
+
+            group_map = {
+                "Age": "age_group",
+                "Race": "race",
+                "County": "county",
+                "Facility ID": "facility_id",
+                "CCS Diagnosis Description": "ccs_diagnosis_description",
+                "Gender": "gender"
+            }
+            value_map = {
+                "Average LOS": "length_of_stay",
+                "Average Cost": "total_costs"
+            }
+
+            if value == "Count":
+                group_df = basic_eda.group_by_count(group_map[group])
+            else:
+                group_df = basic_eda.group_by_average(column=group_map[group], value=value_map[value])
+            st.bar_chart(data=group_df)
 
     if eda_select_box == "Box Plot":
         data_counter_container.header("Boxplot")
