@@ -8,15 +8,15 @@ import streamlit as st
 def eda_options_container():
     eda_select_box = st.selectbox(
             "EDA Options",
-            options=("Basic Info", "Box Plot")
+            options=("Basic Info", "Box Plot", "Correlation")
         )
 
-    data_counter_container = st.container()
+    basic_info_container = st.container()
     if eda_select_box == "Basic Info":
-        data_counter_container.header("Basic Info")
+        basic_info_container.header("Basic Info")
         x_col, y_col = st.columns(2)
 
-        with data_counter_container:
+        with basic_info_container:
             with x_col:
                 group = st.selectbox(
                     "Group By",
@@ -55,8 +55,8 @@ def eda_options_container():
             st.bar_chart(data=group_df)
 
     if eda_select_box == "Box Plot":
-        data_counter_container.header("Boxplot")
-        with data_counter_container:
+        basic_info_container.header("Boxplot")
+        with basic_info_container:
             group = st.selectbox(
                 "Column",
                 options=("Length Of Stay", "Total Cost")
@@ -73,3 +73,4 @@ def eda_options_container():
                 
             st.pyplot(fig)
 
+    # if eda_select_box == "Correlation":
