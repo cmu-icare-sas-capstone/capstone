@@ -9,4 +9,7 @@ pgeocode>=0.3.0
 plotly>=5.6.0
 matplotlib>=3.6.0
 streamlit-option-menu>=0.3.2
+streamlit-nested-layout>=0.1.1
+
+
 
