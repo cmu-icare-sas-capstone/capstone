@@ -1,5 +1,11 @@
+from typing import Dict
+from pandas import DataFrame
+from typing import List
+
 import plotly.express
 import streamlit as st
+from streamlit.delta_generator import DeltaGenerator
+
 import web.cube.Cube as cube
 import l1.etl.DatabaseIO as dbio
 from web.constants.WebConstants import readable_column_map
@@ -7,12 +13,13 @@ import pandas as pd
 import plotly.graph_objects as go
 
 dimensions = ("facility_id", "age_group", "race", "ccs_diagnosis_description", "gender", "area_name")
+values = ("length_of_stay", "total_costs")
 
 
-def olap_container(id: int):
-    filter_types_map = {
+def create_olap_container(container_id: int) -> DataFrame:
+    filter_types_map: Dict[str, str] = {
         "Race": "select_box",
-        "Age Group": "multiselect_box",
+        "Age Group": "select_box",
         "CCS Diagnosis Description": "multiselect_box"
     }
     # TODO: if more dataset need to be added
@@ -24,46 +31,80 @@ def olap_container(id: int):
     #     "Dataset options",
     #     options="Cancer Alley"
     # )
-    data = dbio.read_from_db("hospital_inpatient_discharges")
-    olap_container = st.container()
-    olap_container.header("Group %d" % (id))
+    data: DataFrame = dbio.read_from_db("hospital_inpatient_discharges")
+    olap_container: DeltaGenerator = st.container()
+    olap_container.header("Group %d" % container_id)
 
     with olap_container:
+        filter_col: DeltaGenerator
+        value_col: DeltaGenerator
+        describe_col: DeltaGenerator
         filter_col, value_col, describe_col = st.columns([2, 2, 2])
 
         with filter_col:
-            filter_multiselect_box = st.multiselect(
+            filter_multiselect_box: List[str] = st.multiselect(
                 "Select which filter to enable",
                 ["Race", "Age Group", "CCS Diagnosis Description", "Area Name"],
-                key="filter" + str(id)
+                key="filter" + str(container_id)
             )
 
-            filter_selection_box_map = {}
-            slicers = []
+            filter_selection_box_map: Dict[str, str] = {}
+            slicers: List[str] = []
             for opt in filter_multiselect_box:
                 slicers.append(readable_column_map[opt])
                 if filter_types_map[opt] == 'select_box':
                     selection_box = st.selectbox(
                         opt,
                         options=tuple(cube.query_available_options(data=data, column=readable_column_map[opt])),
-                        key=str(id) + opt
+                        key=str(container_id) + opt
                     )
-                    filter_selection_box_map[str(id) + opt] = selection_box
+                    filter_selection_box_map[str(container_id) + opt] = selection_box
 
                 elif filter_types_map[opt] == "multiselect_box":
-                    multi_selection_box = st.multiselect(
-                        opt,
-                        options=tuple(cube.query_available_options(data=data, column=readable_column_map[opt])),
-                        key=str(id) + opt,
-                    )
+                    key: str = str(container_id) + opt + "mult_select"
+                    if key not in st.session_state:
+                        multiselect_box = []
+                        st.session_state[key] = multiselect_box
+                    else:
+                        multiselect_box = st.session_state[key]
 
-                    filter_selection_box_map[str(id) + opt] = multi_selection_box
+                    with st.expander(opt):
+                        next_val: str = st.selectbox(
+                            opt,
+                            options=tuple(cube.query_available_options(data=data, column=readable_column_map[opt])),
+                            key=str(container_id) + opt,
+                        )
+                        user_val: str = st.text_input(
+                            opt,
+                            key=str(container_id)+opt+"text_input"
+                        )
+                        clear_button: DeltaGenerator = st.button(
+                            "clear",
+                            key=str(container_id)+opt+"button"
+                        )
+                        if clear_button:
+                            next_val = ""
+                            user_val = ""
+                            multiselect_box.clear()
+
+                        if next_val not in multiselect_box and len(next_val) > 0:
+                            multiselect_box.append(next_val)
+
+                        if len(user_val) > 0:
+                            matched_columns: List[str] = cube.match_columns(data=data, column=readable_column_map[opt],
+                                                                            wildcard=user_val)
+                            for item in matched_columns:
+                                if item not in multiselect_box:
+                                    multiselect_box.append(item)
+
+                        st.text_area(opt, value=multiselect_box, disabled=True, key=str(container_id)+opt+"text_area")
+                        filter_selection_box_map[str(container_id) + opt] = multiselect_box
 
         with value_col:
             value_multiselect_box = st.multiselect(
                 "Select which value to drill",
                 ["LOS", "Cost"],
-                key="value" + str(id)
+                key="value" + str(container_id)
             )
 
             values = []
@@ -72,7 +113,7 @@ def olap_container(id: int):
 
         filters = {}
         for opt in filter_multiselect_box:
-            filters[readable_column_map[opt]] = filter_selection_box_map[str(id) + opt]
+            filters[readable_column_map[opt]] = filter_selection_box_map[str(container_id) + opt]
 
         data_cube = pd.DataFrame()
         if len(values) > 0 and len(slicers) > 0 and len(filters) > 0:
@@ -90,61 +131,24 @@ def olap_container(id: int):
                 fig_selection_box = st.selectbox(
                     "Select graph type",
                     options=("Bar Chart", "Pie Chart"),
-                    key="figure_options_" + str(id)
+                    key="figure_options_" + str(container_id)
                 )
             with cal_col:
                 cal_selection_box = st.selectbox(
                     "calculation Method",
                     options=("Sum", "Average", "Count"),
-                    key="calculation_method_" + str(id)
+                    key="calculation_method_" + str(container_id)
                 )
 
             with groupby_col:
                 groupby_selection_box = st.selectbox(
                     "groupby selection box",
                     options=(dimensions - filters.keys()),
-                    key="groupby_selection_" + str(id)
+                    key="groupby_selection_" + str(container_id)
                 )
-                custom_group_checkbox = st.checkbox("Create custom subgroups")
-                if "custom_df" not in st.session_state:
-                    custom_data_cube = pd.DataFrame()
-                    st.session_state["custom_df"] = custom_data_cube
-                    print(str(type(st.session_state["custom_df"])))
-                else:
-                    custom_data_cube = st.session_state["custom_df"]
 
-                if custom_group_checkbox:
-                    custom_cols_multiselect_box = st.multiselect(
-                        "Custom Groups",
-                        options=cube.query_available_options(data, groupby_selection_box),
-                        key="custom_cols_multiselect_box_" + str(id)
-                    )
-
-                    # match custom groups
-                    for i in range(len(custom_cols_multiselect_box)):
-                        if custom_cols_multiselect_box[i] in cube.custom_groups.keys():
-                            custom_group = custom_cols_multiselect_box[i]
-                            # custom_cols_multiselect_box.remove(custom_cols_multiselect_box[i])
-                            custom_cols_multiselect_box.append(custom_group)
-                            real_values = cube.custom_groups[custom_group]
-                            for item in real_values:
-                                cp_data_cube = data_cube.copy(deep=True)
-                                cp_data_cube = cp_data_cube[cp_data_cube[groupby_selection_box] == item]
-                                cp_data_cube.loc[:, groupby_selection_box] = custom_group
-                                print(cp_data_cube)
-                                custom_data_cube = custom_data_cube.append(cp_data_cube)
-                                print(custom_data_cube)
-                        else:
-                            custom_data_cube = custom_data_cube.append(data_cube[data_cube[groupby_selection_box]
-                                                                                 == custom_cols_multiselect_box[i]])
-                    print(custom_cols_multiselect_box)
-                    ref_data_cube = custom_data_cube
-
-                else:
-                    ref_data_cube = data_cube
-            if not ref_data_cube.empty:
-                print(ref_data_cube)
-                groups = cube.group_cube(ref_data_cube, groupby_selection_box)
+            if not data_cube.empty:
+                groups = cube.group_cube(data_cube, groupby_selection_box)
 
                 fig_df = pd.DataFrame()
                 if cal_selection_box == "Sum":
@@ -174,3 +178,5 @@ def olap_container(id: int):
                         fig = plotly.express.bar(fig_df)
 
                     st.plotly_chart(fig)
+
+    return data_cube

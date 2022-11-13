@@ -1,27 +1,16 @@
+from typing import List
+
 import l1.etl.DatabaseIO as dbio
+from pandas import DataFrame
 import re
 data = dbio.read_from_db("hospital_inpatient_discharges")
 
 diabetes_group = ["Diabetes mellitus with complications", "Diabetes mellitus without complication"]
 
-custom_groups = {
-    "Diabetes Group": diabetes_group,
-    "Non Diabetes Group":
-        [item for item in data["ccs_diagnosis_description"].unique().tolist() if item not in diabetes_group]
-}
-
 
 def get_cube(data, slicer: list, filters: dict, values: list):
     cube = data.loc[:, slicer + values]
     for key in filters:
-        # change custom group to real group members
-        # hard code ...
-        for item in filters[key]:
-            if item == "Diabetes Group":
-                filters[key] += parse_custom_group(item)
-            if item == "Non Diabetes Group":
-                filters[key] += parse_custom_group(item)
-
         if type(filters[key]) is list:
             query_str = "%s==%s" % (key, filters[key])
         else:
@@ -53,10 +42,14 @@ def match_all_value_of_wildcard(data, column: str, wildcard: str):
     return matched_values
 
 
-def parse_custom_group(group_name):
-    for key in custom_groups:
-        if group_name == key:
-            return custom_groups[key]
+def match_columns(data: DataFrame, column: str, wildcard: str) -> List[str]:
+    available_columns: List[str] = query_available_options(data, column)
+    matched_columns: List[str] = []
+    for column in available_columns:
+        if re.match(wildcard, column):
+            matched_columns.append(column)
+    return matched_columns
+
 
 # run tests
 if __name__ == "__main__":
@@ -65,6 +58,8 @@ if __name__ == "__main__":
     # print(res1)
     # res2 = query_available_options(data, "ccs_diagnosis_description")
     # print(res2)
+    res3 = match_columns(data, "ccs_diagnosis_description", "Dia.*")
+    print(res3)
 
 
 
