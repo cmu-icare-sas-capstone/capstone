@@ -19,6 +19,7 @@ will use dtypes to reformat the data
 
 class DataLoader:
     strange_characters = r"(\s|:|\(|\)|\-|\+|\$|>|\.)"
+    strange_characters_columns = r"(\s|:|\(|\)|\-|\+|\$|>)"
 
     def __init__(self):
         return
@@ -69,23 +70,23 @@ class DataLoader:
             # ------------- conversion block - filename ----------------#
             if filename == FILEPATH.CMS_Medicare_Cancer_Alley_DATA1_4_:
                 for member in DTYPES.MEDICARE_DTYPES:
-                    df[member] = df[member].replace(DataLoader.strange_characters, "", regex=True)
+                    df[member] = df[member].replace(DataLoader.strange_characters_columns, "", regex=True)
                 df = df.astype(DTYPES.MEDICARE_DTYPES)
 
             elif filename == FILEPATH.Comorbidities_for_COVID_Synthetic_data:
                 for member in DTYPES.COMORBIDITIES_DTYPES:
-                    df[member] = df[member].replace(DataLoader.strange_characters, "", regex=True)
+                    df[member] = df[member].replace(DataLoader.strange_characters_columns, "", regex=True)
                 df = df.astype(DTYPES.COMORBIDITIES_DTYPES)
 
             elif filename == FILEPATH.Diagnosis_Review:
                 for member in DTYPES.DIAGNOSIS_REVIEW_DTYPES:
-                    df[member] = df[member].replace(DataLoader.strange_characters, "", regex=True)
+                    df[member] = df[member].replace(DataLoader.strange_characters_columns, "", regex=True)
                 df = df.dropna(subset=DTYPES.DIAGNOSIS_REVIEW_DTYPES.keys())
                 df = df.astype(DTYPES.DIAGNOSIS_REVIEW_DTYPES)
             # ------------- conversion block - filename ----------------#
         else:
             for member in format_types:
-                df[member] = df[member].replace(DataLoader.strange_characters, "", regex=True)
+                df[member] = df[member].replace(DataLoader.strange_characters_columns, "", regex=True)
             df = df.dropna(subset=format_types.keys())
             df = df.astype(format_types)
 
@@ -167,4 +168,5 @@ class DataLoader:
 
 
 data_loader = DataLoader()
-data_loader.filter()
+df = data_loader.filter()
+data_loader.load(df, "cancer_alley_data")
