@@ -1,25 +1,31 @@
-"""
-Main entrance for streamlit
-"""
+from typing import Dict
 import streamlit as st
-from streamlit_option_menu import option_menu
-from web.components.eda_options_container import eda_options_container
-from web.components.model_container import model_container
-from web.components.cube_container import olap_container
-import streamlit_nested_layout
 st.set_page_config(layout="wide")
+from streamlit_option_menu import option_menu
+import streamlit_nested_layout
+import init
+from frontend.pages import data_cleaning_page
+from frontend.pages.dashboard_page import cube_creator_page
+from frontend.pages import model_page
+from frontend.pages import nlp_page
 
 with st.sidebar:
-    selected = option_menu("Main Menu", ["EDA", "Model", "OLAP"],
-        icons=['house'], menu_icon="cast", default_index=0)
+    selected = option_menu(
+        "Main Menu",
+        ["Data Cleaning", "Cube Creator", "Model", "NLP"],
+        menu_icon="cast",
+        default_index=0
+    )
 
-if selected == "EDA":
-    eda_options_container()
-elif selected == 'Model':
-    model_container()
-elif selected == "OLAP":
-    col1, col2 = st.columns(2)
-    with col1:
-        olap_container(0)
-    with col2:
-        olap_container(1)
+if "cube_map" not in st.session_state:
+    st.session_state["cube_map"] = {}
+cube_map: Dict = st.session_state["cube_map"]
+
+if selected == "Data Cleaning":
+    data_cleaning_page.create_data_cleaning_page()
+if selected == "Cube Creator":
+    cube_map = cube_creator_page.create_cube_creator_page()
+if selected == "Model":
+    model_page.create_model_page()
+if selected == "NLP":
+    nlp_page.create_nlp_page()
