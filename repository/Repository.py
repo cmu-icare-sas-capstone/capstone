@@ -1,12 +1,17 @@
-import repository.DuckRepository as duck
 from pandas import DataFrame
-from bean.Beans import logger
-from repository.GlobalState import get_global_state
+from bean.logger import get_logger
+from repository.DuckRepository import DuckRepository
+
+
+logger = get_logger(__name__)
 
 
 class Repository:
-    def __init__(self):
-        self.repo = duck.repo
+    def __init__(self, app_config, conn):
+        if app_config.env == "dev" \
+                or app_config.env == "test"\
+                or app_config.env == "prod":
+            self.repo = DuckRepository(conn)
 
     def execute(self, sql):
         return self.repo.execute(sql)
@@ -15,7 +20,6 @@ class Repository:
         return self.repo.execute_without_result(sql)
 
     def save_df(self, df: DataFrame, name: str):
-        logger.debug("save df " + name)
         self.repo.save_df(df, name)
 
     def read_df(self, name):
@@ -30,11 +34,17 @@ class Repository:
     def get_all_views(self):
         return self.repo.get_all_views()
 
+    def peak_table(self, table_name):
+        return self.repo.peak_table(table_name)
 
-global_state = get_global_state()
+    def delete_table(self, table_name):
+        self.repo.delete_table(table_name)
 
-if global_state.get("repo") is None:
-    repo = Repository()
-    global_state.put("repo", repo)
+    def get_values_of_one_column(self, table_name, column):
+        return self.repo.get_values_of_one_column(table_name, column)
 
-repo = global_state.get("repo")
+    def get_values_of_one_column_by_filters(self, table_name, column, filters):
+        return self.repo.get_values_of_one_column_by_filters(table_name, column, filters)
+
+    def get_values_of_one_column_by_query(self, query):
+        return self.repo.get_values_of_one_column_by_query(query)

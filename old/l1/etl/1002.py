@@ -1,5 +1,5 @@
 import pandas as pd
-df = pd.read_csv("../../data/files/hospital_inpatient_discharges_6_5.csv")
+df = pd.read_csv("../../data/files/data6_5.csv")
 pd.set_option("display.max_columns", 20)
 print(df.head(20))
 columns = df.columns

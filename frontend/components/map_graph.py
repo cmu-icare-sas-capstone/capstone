@@ -1,10 +1,13 @@
 import folium as folium
 
-from entity.Cube import Cube
+from repository.Cube import Cube
 import streamlit as st
 from folium.plugins import HeatMap
 import streamlit.components.v1 as components
-from bean.Beans import logger
+from bean.logger import get_logger
+
+
+logger = get_logger(__name__)
 
 
 def create_map_graph(cube: Cube):
@@ -31,7 +34,7 @@ def create_map_graph(cube: Cube):
 
     if cal_selection_box == "SUM":
         df = cube.get_group_by_values(group_by_selection_box, [value_selection_box], [cal_selection_box])
-        df = df.rename({
+        df = df.rename(columns={
             "lat": "latitude",
             "lon": "longitude",
             "%s_%s" % (cal_selection_box, value_selection_box): "weight"
@@ -51,4 +54,4 @@ def create_map(df):
     lat, lon = df.loc[0, "latitude"], df.loc[0, "longitude"]
     m = folium.Map([lat, lon], tiles='cartodbpositron', zoom_start=9)
     HeatMap(map_df).add_to(m)
-    components.html(m._repr_html_(), width=1400, height=1000)
+    components.html(m._repr_html_(), width=800, height=600)

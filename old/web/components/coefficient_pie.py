@@ -5,9 +5,8 @@ Created on Thu Oct  6 20:20:05 2022
 @author: mengy
 """
 
-from l2.models.LR1 import model as lr
+from old.l2.models.LR1 import model as lr
 import streamlit as st
-import plotly.express as px
 import plotly.graph_objects as go
 
 @st.cache

@@ -14,7 +14,7 @@ Add a folder with name data and a subfolder called pickles under it. After the f
 
 ```python
 # after you include the project path
-import l1.etl.DatabaseIO as dbio
+import old.l1.etl.DatabaseIO as dbio
 
 # read from the databaase
 dbio.read_from_db("table_name")

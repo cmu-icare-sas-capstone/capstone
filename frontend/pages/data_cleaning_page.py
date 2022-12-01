@@ -2,13 +2,17 @@ import streamlit as st
 from pandas import DataFrame
 import pandas as pd
 from repository.SessionState import session_state
-from service.DefaultProcessService import default_process_service
-from bean.Beans import logger
-from repository.Repository import repo
-from repository.MetaDataRepository import meta_data_repo
+from bean.logger import get_logger
+from bean.GlobalState import state
+
+
+repo = state.get("repo")
+meta_data_repo = state.get("meta_data_repo")
 
 
 def create_data_cleaning_page():
+    logger = get_logger(__name__)
+    default_process_service = state.get("default_process_service")
     uploaded_df: DataFrame()
     cleaned_table_name = session_state.get("cleaned_table_name")
     is_default: bool = False
@@ -16,7 +20,7 @@ def create_data_cleaning_page():
     table_name: str = upload_file()
     logger.debug("Get uploaded file: %s" % table_name)
 
-    if len(table_name) > 0:
+    if len(table_name) > 0 and cleaned_table_name is None:
         is_default = default_process_service.is_default(table_name)
         logger.debug("The upload file is default: %s" % is_default)
         if is_default:
@@ -48,8 +52,6 @@ def upload_file() -> str:
         session_state.remove("uploaded_file")
 
     uploaded_file = st.file_uploader("Choose a File", on_change=change_file)
-
-    logger.debug(session_state.get("uploaded_file"))
 
     if session_state.get("uploaded_file") is not None:
         return session_state.get("uploaded_file")
