@@ -1,12 +1,7 @@
-import time
-
-import pandas as pd
-import l1.etl.DatabaseIO as dbio
-import l1.constants.FILEPATH as FILEPATH
-from l1.etl.DataLoader import data_loader
+import old.l1.etl.DatabaseIO as dbio
+import old.l1.constants.FILEPATH as FILEPATH
 import matplotlib
 matplotlib.use("TkAgg")
-import matplotlib.pyplot as plt
 
 """
 frequency of los
@@ -28,7 +23,7 @@ frequency of los
 
 df = dbio.read_from_db("cms_medicare_with_covid_risk")
 print(df[["length_of_stay"]].describe())
-df[["length_of_stay"]].describe().to_csv(FILEPATH.BASE_PATH+"/data/los_description.csv")
+df[["length_of_stay"]].describe().to_csv(FILEPATH.BASE_PATH + "/data/los_description.csv")
 # group_sql =\
 # "select \
 # 	zip_code_3_digits, \

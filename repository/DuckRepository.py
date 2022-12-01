@@ -1,6 +1,8 @@
-from configuration.DuckDbConfiguration import duckdb_configuration
 from pandas import DataFrame
-from bean.Beans import logger
+from bean.logger import get_logger
+
+
+logger = get_logger(__name__)
 
 
 class DuckRepository:
@@ -11,10 +13,10 @@ class DuckRepository:
         "str": "TEXT"
     }
 
-    def __init__(self):
-        self.conn = duckdb_configuration.get_connection()
+    def __init__(self, conn):
+        self.conn = conn
 
-    def execute(self, sql):
+    def execute(self, sql) -> DataFrame:
         return self.conn.execute(query=sql).df()
 
     def execute_without_result(self, sql):
@@ -23,9 +25,6 @@ class DuckRepository:
     def save_df(self, df: DataFrame, name: str):
         df.columns = df.columns.str.lower()
         df = df.loc[:, ~df.columns.duplicated()]
-        exist = self.exists_table(name)
-        if exist:
-            return
         self.conn.register("df", df)
         self.conn.execute("CREATE TABLE %s AS SELECT * FROM df" % name)
         self.conn.unregister("df")
@@ -47,11 +46,48 @@ class DuckRepository:
     def get_all_views(self):
         sql = "SELECT table_name FROM information_schema.tables WHERE table_type = 'VIEW'"
         logger.debug(sql)
-        views = self.execute_without_result(sql).fetchone()
-        if views is None:
-            return []
-        logger.debug(type(views))
-        return list(views)
+        views = self.execute_without_result(sql).fetchall()
+        view_list = []
+        for v in views:
+            view_list.append(v[0])
+        return view_list
 
+    def peak_table(self, table_name) -> DataFrame:
+        sql = "SELECT * FROM \"%s\" LIMIT 20" % table_name
+        logger.debug(sql)
+        return self.execute(sql)
 
-repo = DuckRepository()
+    def delete_table(self, table_name) -> DataFrame:
+        sql = "DROP TABLE IF EXISTS \"%s\"" % table_name
+        logger.debug(sql)
+        self.execute_without_result(sql)
+
+    def get_values_of_one_column(self, table_name, column):
+        sql = "SELECT DISTINCT %s FROM %s" % (column, table_name)
+        logger.debug(sql)
+        values = self.execute_without_result(sql).fetchall()
+        value_list = []
+        for v in values:
+            value_list.append(v[0])
+        value_list.sort()
+        return value_list
+
+    def get_values_of_one_column_by_query(self, query):
+        values = self.execute_without_result(query).fetchall()
+        value_list = []
+        for v in values:
+            value_list.append(v[0])
+        value_list.sort()
+        return value_list
+
+    def get_values_of_one_column_by_filters(self, table_name, column, filters):
+        sql = "SELECT DISTINCT %s FROM %s WHERE " % (column, table_name)
+        for key in filters:
+            sql = sql + "%s in (%s)" % (key, ("'" + "','".join(filters[key]) + "'"))
+        logger.debug(sql)
+        values = self.execute_without_result(sql).fetchall()
+        value_list = []
+        for v in values:
+            value_list.append(v[0])
+        value_list.sort()
+        return value_list

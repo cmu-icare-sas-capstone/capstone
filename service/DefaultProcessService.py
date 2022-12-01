@@ -1,6 +1,4 @@
 from service.ProcessService import ProcessService
-from bean.Beans import logger
-from repository.Repository import repo
 """
 clean rules: {
     columns: {
@@ -30,6 +28,7 @@ class DefaultProcessService(ProcessService):
                     "Total Charges", "Total Costs",
                     "FIPS_Code_x", "Area_name", "CDC 2018 Diagnosed Diabetes Percentage",
                     "CDC 2018 Overall SVI", "SUM of COUNTUNIQUE of Rndrng_NPI 2019 Physician Other Providers PUF",
+                    "AVERAGE of Bene_Avg_Risk_Scre 2019 Physician Other Providers PUF",
                     "COVID", "COVID_HOSP", "PRIMARY_ADM_DIAG", "LAT", "LON"
                     ],
         "rename": {
@@ -59,33 +58,32 @@ class DefaultProcessService(ProcessService):
                 "calc_col": "long_stay",
                 "dtype": "int",
                 "conditions": [
-                    ["gt", "9", "1"],
-                    ["set", "9", "0"]
+                    ["gt", "5.5", "1"],
+                    ["set", "5.5", "0"]
                 ]
             }
         ]
 
     }
 
+    def __init__(self, repo):
+        super().__init__(repo)
+        self.repo = repo
+
     # fetch a dataframe to see if it is default
     def is_default(self, df_name: str) -> bool:
-        logger.debug(df_name)
         sql = "SELECT * FROM %s LIMIT 5" % df_name
-        df = repo.execute(sql)
-        logger.debug(df.columns)
+        df = self.repo.execute(sql)
         for col in self.CLEAN_RULES["columns"]:
-            logger.debug(col)
             if col.lower() not in df.columns:
                 return False
         return True
 
     def process(self, df_name) -> str:
-        exist = repo.exists_table(df_name + "_clean")
+        exist = self.repo.exists_table(df_name + "_clean")
         if exist:
             return df_name + "_clean"
         super(DefaultProcessService, self).clean(df_name, self.CLEAN_RULES)
         super(DefaultProcessService, self).feature_eng(df_name+"_clean", self.FEA_RULES)
+        self.repo.delete_table(df_name)
         return df_name + "_clean"
-
-
-default_process_service = DefaultProcessService()

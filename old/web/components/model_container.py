@@ -1,5 +1,5 @@
 import streamlit as st
-from web.components.coefficient_pie import plot_pie
+from old.web.components.coefficient_pie import plot_pie
 
 
 def model_container():

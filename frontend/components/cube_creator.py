@@ -1,14 +1,15 @@
 from typing import List, Dict
-
-import streamlit
-from repository.MetaDataRepository import meta_data_repo
 from frontend.components import multi_selector
+from bean.GlobalState import state
+from repository.Cube import Cube
 import streamlit as st
-from entity.Cube import Cube
 import uuid
 
 
-def create_cube_creator(dataset_name: str) -> Cube:
+meta_data_repo = state.get("meta_data_repo")
+
+
+def create_cube_creator(dataset_name: str, cube) -> dict:
     src_dimensions: tuple = meta_data_repo.get_dimensions(dataset_name)
     src_values: tuple = meta_data_repo.get_values(dataset_name)
     filter_multiselect_box: List[str] = st.multiselect(
@@ -17,9 +18,10 @@ def create_cube_creator(dataset_name: str) -> Cube:
         key="cube_creator_filter"
     )
 
-    value_multiselect_box: List[str] = streamlit.multiselect(
+    value_multiselect_box: List[str] = st.multiselect(
         "Select with value to explore",
         options=src_values,
+        default=cube.values,
         key="cube_creator_value"
     )
 
@@ -33,28 +35,9 @@ def create_cube_creator(dataset_name: str) -> Cube:
         "filters": filters,
         "values": values
     }
-    name = st.text_input(
-            "Cube Name",
-            placeholder="Please enter a name for the cube"
-        )
 
-    add_button = st.button(
-        "Save Cube",
-        key="cube_creator_save_cube_button"
-    )
-
-    if name == "":
-        name = (str(uuid.uuid1()))[0: 6]
-
-    if len(filters) > 0 and len(values) > 0:
-        cube = Cube(dataset_name, name)
+    if len(cube.values) > 0 or len(rules["values"]) > 0:
         cube_values = cube.peek_cube(rules)
         st.table(cube_values.describe())
 
-        if add_button:
-            cube.init_cube(rules)
-            return cube
-
-    return None
-
-
+    return rules

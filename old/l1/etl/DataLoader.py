@@ -1,9 +1,8 @@
 import pandas
-import pandas as pd
 
-from l1.constants import FILEPATH
-from l1.constants import DTYPES
-from l1.etl.DatabaseIO import write_to_db
+from old.l1.constants import FILEPATH
+from old.l1.constants import DTYPES
+from old.l1.etl.DatabaseIO import write_to_db
 
 from pandas import DataFrame
 import re
@@ -136,7 +135,7 @@ class DataLoader:
         print("Finished!")
 
     def filter(self):
-        df = pandas.read_csv("/Users/mtong/Documents/project/capstone/data/files/hospital_inpatient_discharges_6_5.csv")
+        df = pandas.read_csv("/data/files/data6_5.csv")
         important_cols = ['Facility Id', 'Age Group', 'Zip Code - 3 digits', 'Gender',
                           'Race', 'Ethnicity', 'Length of Stay', 'Type of Admission',
                           'Patient Disposition', 'CCS Diagnosis Code', 'CCS Diagnosis Description',

@@ -1,6 +1,6 @@
 import pandas as pd
 
-import l2.eda.basic_eda as basic_eda
+from old import l2 as basic_eda
 import matplotlib.pyplot as plt
 import streamlit as st
 

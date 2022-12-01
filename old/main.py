@@ -5,11 +5,9 @@ import streamlit as st
 from pandas import DataFrame
 from streamlit_option_menu import option_menu
 
-import web.components.cube_container
-from web.components.eda_options_container import eda_options_container
-from web.components.model_container import model_container
-from web.components.cube_container import create_olap_container
-import streamlit_nested_layout
+from old.web.components import eda_options_container
+from old.web.components import model_container
+from old.web.components.cube_container import create_olap_container
 import plotly.graph_objects as go
 import plotly
 st.set_page_config(layout="wide")
@@ -54,7 +52,7 @@ elif selected == "Dashboard":
 
             selected_values = []
             for item in fig_df.columns:
-                if item in web.components.cube_container.values:
+                if item in old.web.components.cube_container.values:
                     selected_values.append(item)
 
             if cal_selection_box == "Sum":

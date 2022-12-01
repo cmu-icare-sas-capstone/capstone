@@ -1,9 +1,9 @@
 import threading
 import pandas as pd
-from utils.MySQLEngine import mysql_engine
+from old.utils.MySQLEngine import mysql_engine
 from pandas import DataFrame
-import l1.constants.FILEPATH as FILEPATH
-from datetime import datetime
+import old.l1.constants.FILEPATH as FILEPATH
+
 
 class DatabaseIO(threading.Thread):
     batch_num = 0

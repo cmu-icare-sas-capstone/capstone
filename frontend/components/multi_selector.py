@@ -3,8 +3,11 @@ from typing import List
 import streamlit as st
 
 import utility
-from bean.Beans import logger
+from bean.logger import get_logger
 from repository.SessionState import session_state
+
+
+logger = get_logger(__name__)
 
 
 def create_multi_selector(key: str, label: str, options: List[str]) -> List[str]:

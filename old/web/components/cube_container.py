@@ -6,9 +6,8 @@ import plotly.express
 import streamlit as st
 from streamlit.delta_generator import DeltaGenerator
 
-import web.cube.Cube as cube
-import l1.etl.DatabaseIO as dbio
-from web.constants.WebConstants import readable_column_map
+import old.l1.etl.DatabaseIO as dbio
+from old.web.constants.WebConstants import readable_column_map
 import pandas as pd
 import plotly.graph_objects as go
 
@@ -55,7 +54,7 @@ def create_olap_container(container_id: int) -> DataFrame:
                 if filter_types_map[opt] == 'select_box':
                     selection_box = st.selectbox(
                         opt,
-                        options=tuple(cube.query_available_options(data=data, column=readable_column_map[opt])),
+                        options=tuple(Cube.query_available_options(data=data, column=readable_column_map[opt])),
                         key=str(container_id) + opt
                     )
                     filter_selection_box_map[str(container_id) + opt] = selection_box
@@ -71,7 +70,7 @@ def create_olap_container(container_id: int) -> DataFrame:
                     with st.expander(opt):
                         next_val: str = st.selectbox(
                             opt,
-                            options=tuple(cube.query_available_options(data=data, column=readable_column_map[opt])),
+                            options=tuple(Cube.query_available_options(data=data, column=readable_column_map[opt])),
                             key=str(container_id) + opt,
                         )
                         user_val: str = st.text_input(
@@ -91,7 +90,7 @@ def create_olap_container(container_id: int) -> DataFrame:
                             multiselect_box.append(next_val)
 
                         if len(user_val) > 0:
-                            matched_columns: List[str] = cube.match_columns(data=data, column=readable_column_map[opt],
+                            matched_columns: List[str] = Cube.match_columns(data=data, column=readable_column_map[opt],
                                                                             wildcard=user_val)
                             for item in matched_columns:
                                 if item not in multiselect_box:
@@ -117,7 +116,7 @@ def create_olap_container(container_id: int) -> DataFrame:
 
         data_cube = pd.DataFrame()
         if len(values) > 0 and len(slicers) > 0 and len(filters) > 0:
-            data_cube = cube.get_cube(data, list(dimensions), filters, values)
+            data_cube = Cube.peek_cube(data)
 
         if not data_cube.empty:
             with describe_col:
@@ -148,7 +147,7 @@ def create_olap_container(container_id: int) -> DataFrame:
                 )
 
             if not data_cube.empty:
-                groups = cube.group_cube(data_cube, groupby_selection_box)
+                groups = Cube.group_cube(data_cube, groupby_selection_box)
 
                 fig_df = pd.DataFrame()
                 if cal_selection_box == "Sum":

@@ -1,6 +1,6 @@
 import pgeocode
-import l1.etl.DatabaseIO as dbio
-import l1.constants.FILEPATH as FILEPATH
+import old.l1.etl.DatabaseIO as dbio
+
 
 def heatmap_los():
     # TODO add pickle read and write to sql
