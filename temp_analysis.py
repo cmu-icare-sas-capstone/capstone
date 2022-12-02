@@ -55,4 +55,9 @@ def data7():
     df = pandas.read_pickle("data/pickles/data7_0")
     print(df.columns)
 
-data7()
+def risk_score():
+    sql = "SELECT DISTINCT area_name, average_of_bene_avg_risk_scre_2019_physician_other_providers_puf FROM default_data_clean"
+    df = repo.execute(sql)
+    print(df)
+
+risk_score()

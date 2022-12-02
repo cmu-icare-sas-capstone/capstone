@@ -12,7 +12,7 @@ from frontend.pages import nlp_page
 with st.sidebar:
     selected = option_menu(
         "Main Menu",
-        ["Data Cleaning", "Cube Creator", "Model", "NLP"],
+        ["Data Cleaning", "Dashboard", "Model", "NLP"],
         menu_icon="cast",
         default_index=0
     )
@@ -23,7 +23,7 @@ cube_map: Dict = st.session_state["cube_map"]
 
 if selected == "Data Cleaning":
     data_cleaning_page.create_data_cleaning_page()
-if selected == "Cube Creator":
+if selected == "Dashboard":
     cube_map = cube_creator_page.create_cube_creator_page()
 if selected == "Model":
     model_page.create_model_page()
