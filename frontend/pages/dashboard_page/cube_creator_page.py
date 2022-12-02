@@ -53,14 +53,14 @@ def create_cube_creator_page():
         with col5:
             save = st.button(label="Save Cube")
             if save:
-                selected_cube.persist_cube(create_rules)
+                selected_cube.persist_cube(create_rules, cube_name)
         with col6:
             delete = st.button(label="Delete")
 
     with col3:
-        logger.debug(selected_cube.values)
-        if len(selected_cube.values) > 0:
-            dashboard.create_dashboard(dataset_name=dataset_name, selected_cube=selected_cube)
+        if meta_data_repo.exists_view(selected_cube.cube_name, dataset_name):
+            if len(selected_cube.values) > 0:
+                dashboard.create_dashboard(dataset_name=dataset_name, selected_cube=selected_cube)
     # col_cube_creator, col_cube_list = st.columns([5, 5])
     #
 

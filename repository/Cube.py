@@ -23,7 +23,7 @@ class Cube:
         self.dimensions = meta_data_repo.get_dimensions(dataset_name)
         self.rules = rules
 
-    def persist_cube(self, rules):
+    def persist_cube(self, rules, new_name):
         self.rules = rules
         sql = "CREATE OR REPLACE View %s AS %s" % (self.cube_name, self.parse_sql_from_rules(rules))
         logger.debug(sql)
@@ -36,6 +36,15 @@ class Cube:
               % (str(self.rules).replace("'", ""), self.dataset_name, self.cube_name)
         logger.debug(sql)
         repo.execute_without_result(sql)
+        sql = "UPDATE \"view\" SET view_name = '%s' WHERE table_name = '%s' AND view_name = '%s'"\
+              % (new_name, self.dataset_name, self.cube_name)
+        logger.debug(sql)
+        repo.execute_without_result(sql)
+
+        sql = "ALTER VIEW %s RENAME TO '%s'" % (self.cube_name, new_name)
+        logger.debug(sql)
+        repo.execute_without_result(sql)
+        self.cube_name = new_name
 
     def counts(self):
         sql = "SELECT COUNT(*) FROM %s" % self.cube_name
