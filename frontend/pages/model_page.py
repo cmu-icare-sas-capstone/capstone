@@ -5,6 +5,9 @@ import pickle
 import matplotlib.pyplot as plt
 import seaborn as sns
 from pypika import Query, Table, Field
+import math
+from scipy.stats import norm
+import numpy as np
 
 
 repo = state.get("repo")
@@ -174,19 +177,28 @@ def create_model_page():
         "apr_mdc_code_"+str(apr_mdc_code): 1
     }, ignore_index=True)
     x = x.fillna(0)
-
+    sigma = 0
     if model == "ridge":
-        with open("/Users/mtong/Documents/project/capstone/model/ridge.pkl", 'rb') as file:
+        sigma = 16.72
+        with open("./model/ridge.pkl", 'rb') as file:
             f = pickle.load(file)
     elif model == "XGBoost":
-        with open("/Users/mtong/Documents/project/capstone/model/xgb_model.pkl", 'rb') as file:
+        sigma = 17.02
+        with open("./model/xgb_model.pkl", 'rb') as file:
             f = pickle.load(file)
 
     predict_value = f.predict(x)
     if predict_value < 0:
         predict_value = 0
 
-    st.write("Estimated LOS: " + str(predict_value))
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric("Estimation", value="%.2f" % predict_value)
+    with col2:
+        st.metric("MSE", value=sigma)
+    with col3:
+        st.metric("95% Estimation Range",
+                  value="[%.2f, %.2f]" % (max(0, predict_value-1.96*math.sqrt(sigma)), predict_value+1.96*math.sqrt(sigma)))
 
     with st.expander("Model Analysis"):
         if model == "ridge":

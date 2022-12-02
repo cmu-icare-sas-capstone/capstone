@@ -14,5 +14,6 @@ duckdb>=0.5.1
 xgboost==1.7.1
 seaborn==0.12.1
 pypika==0.48.9
-
+keybert==0.7.0
+spacy==3.4.3
 

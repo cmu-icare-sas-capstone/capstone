@@ -1,3 +1,5 @@
+import pandas
+
 import init
 from bean.GlobalState import state
 
@@ -49,4 +51,8 @@ def los():
       res = repo.execute(sql)
       res.to_csv("los_separate.csv")
 
-los()
+def data7():
+    df = pandas.read_pickle("data/pickles/data7_0")
+    print(df.columns)
+
+data7()

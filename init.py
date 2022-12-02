@@ -46,6 +46,8 @@ if app_config.env == "dev" and app_config.process_default_data:
             ["age_group, race, facility_id, ccs_description_description"],
             ["length_of_stay", "total_costs", "long_stay"]
         )
+        df = repo.read_df("default_data_clean")
+        df.to_pickle("data7_0")
 
 
 elif app_config.env == "test":
