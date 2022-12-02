@@ -5,8 +5,6 @@ import pickle
 import matplotlib.pyplot as plt
 import seaborn as sns
 from pypika import Query, Table, Field
-
-
 repo = state.get("repo")
 meta_data_repo = state.get("meta_data_repo")
 
@@ -16,6 +14,19 @@ def create_model_page():
         label="dataset",
         options=meta_data_repo.get_all_tables()
     )
+
+
+    #add CorreM. 
+    df = pd.read_pickle(".\data\pickles\clean_test")
+    corrM1 = df.corr() 
+    corrM = corrM1[['total_costs', 'length_of_stay']]
+    pd.set_option("display.max_columns", None)
+    fig, ax = plt.subplots(figsize=(10,40))  
+    sns.heatmap(corrM, annot=True)
+    plt.title(' TOTAL_COSTS                     LENGTH_OF_STAY')
+    fig.show()
+    st.pyplot(fig)
+
     model = st.selectbox(
         label="Model",
         options=("ridge", "XGBoost")
@@ -176,10 +187,10 @@ def create_model_page():
     x = x.fillna(0)
 
     if model == "ridge":
-        with open("/Users/mtong/Documents/project/capstone/model/ridge.pkl", 'rb') as file:
+        with open("./model/ridge.pkl", 'rb') as file:
             f = pickle.load(file)
     elif model == "XGBoost":
-        with open("/Users/mtong/Documents/project/capstone/model/xgb_model.pkl", 'rb') as file:
+        with open("./model/xgb_model.pkl", 'rb') as file:
             f = pickle.load(file)
 
     predict_value = f.predict(x)
