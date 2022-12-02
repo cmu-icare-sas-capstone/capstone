@@ -119,12 +119,18 @@ def create_model_page():
             }
         )[0]
 
-    columns = ['age_group', 'apr_severity_of_illness_code', 'covid_hosp',
-       'covid_risk_factor', 'gender_M', 'race_Multi-racial', 'race_Other Race',
-       'race_White', 'ethnicity_Not Span/Hispanic',
-       'ethnicity_Spanish/Hispanic', 'ethnicity_Unknown',
-       'type_of_admission_Trauma', 'type_of_admission_Urgent',
-       'payment_typology_1_Federal/State/Local/VA',
+        number_of_physician = st.text_input(label="number of physician", value=25)
+        hcc_code = st.text_input(label="HCC Code", value=1.8)
+
+
+    columns = ['age_group', 'apr_severity_of_illness_code',
+       'sum_countunique_rndrng_npi_physician_other_providers',
+       'average_of_bene_avg_risk_scre_2019_physician_other_providers_puf',
+       'covid_hosp', 'long_stay', 'gender_M', 'race_Multi-racial',
+       'race_Other Race', 'race_White', 'covid_True',
+       'ethnicity_Not Span/Hispanic', 'ethnicity_Spanish/Hispanic',
+       'ethnicity_Unknown', 'type_of_admission_Trauma',
+       'type_of_admission_Urgent', 'payment_typology_1_Federal/State/Local/VA',
        'payment_typology_1_Medicaid', 'payment_typology_1_Medicare',
        'patient_disposition_Cancer Center or Children\'s Hospital',
        'patient_disposition_Court/Law Enforcement',
@@ -166,7 +172,6 @@ def create_model_page():
         "age_group": age_group,
         "apr_severity_of_illness_code": apr_severity_of_illness_code,
         "covid_hosp": covid_hosp,
-        "covid_risk_factor": 1,
         "gender_M": gender_M,
         "race_"+race: 1,
         "ethnicity_"+ethnicity: 1,
@@ -174,16 +179,23 @@ def create_model_page():
         "payment_typology_1_"+payment_typology: 1,
         "patient_disposition_"+patient_disposition: 1,
         "apr_drg_code_"+str(apr_drg_code): 1,
-        "apr_mdc_code_"+str(apr_mdc_code): 1
+        "apr_mdc_code_"+str(apr_mdc_code): 1,
+        "sum_countunique_rndrng_npi_physician_other_providers": number_of_physician,
+        "average_of_bene_avg_risk_scre_2019_physician_other_providers_puf": hcc_code
     }, ignore_index=True)
     x = x.fillna(0)
+    print(x.columns)
     sigma = 0
     if model == "ridge":
-        sigma = 16.72
+        sigma = 9.74
         with open("./model/ridge.pkl", 'rb') as file:
             f = pickle.load(file)
     elif model == "XGBoost":
-        sigma = 17.02
+        sigma = 16.91
+        with open("./model/xgb_model.pkl", 'rb') as file:
+            f = pickle.load(file)
+    elif model == "Linear":
+        sigma = 9.74
         with open("./model/xgb_model.pkl", 'rb') as file:
             f = pickle.load(file)
 
