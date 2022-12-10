@@ -40,6 +40,9 @@ class Repository:
     def delete_table(self, table_name):
         self.repo.delete_table(table_name)
 
+    def remove_df(self, name):
+        self.delete_table(name)
+
     def get_values_of_one_column(self, table_name, column):
         return self.repo.get_values_of_one_column(table_name, column)
 

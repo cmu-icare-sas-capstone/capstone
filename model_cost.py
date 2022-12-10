@@ -1,4 +1,5 @@
 import pandas as pd
+import pickle
 import numpy as np
 from scipy import stats
 from sklearn.model_selection import train_test_split
@@ -17,7 +18,7 @@ df.loc[df['covid'] == '0', 'covid'] = 'FALSE'
 df.loc[df['covid'] == '1', 'covid'] = 'TRUE'
 
 # drop columns where there are only 1 or NAN values
-df = df.drop(columns=['ccs_diagnosis_description','primary_adm_diag','apr_mdc_description','apr_drg_description'])
+df = df.drop(columns=['ccs_diagnosis_description','primary_adm_diag','apr_mdc_description','apr_drg_description', "apr_severity_of_illness_code"])
 # drop the variables that are not useful in model: 'index', 'facility ID','zip code','area_name',attending_provider_license_number ''
 df = df.drop(columns=['area_name','zip_code_3_digits','attending_provider_license_number','fips_code_x','lat','lon'])
 # drop highly correlated columns
@@ -102,7 +103,8 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random
 
 lr_model = LinearRegression()
 lr_model.fit(X_train, y_train)
-lr_model.fit(X_train, y_train)
+print(X.columns)
+pickle.dump(lr_model, open('model/lr_model_cost.pkl', 'wb'))
 y_pred = lr_model.predict(X_test)
 print("Training R-squared: ", lr_model.score(X_train,y_train))
 print("Testing R-squared: ", lr_model.score(X_test,y_test), "\n")

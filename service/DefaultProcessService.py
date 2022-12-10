@@ -79,11 +79,13 @@ class DefaultProcessService(ProcessService):
                 return False
         return True
 
-    def process(self, df_name) -> str:
+    def process(self, df_name, progress_bar=None) -> str:
         exist = self.repo.exists_table(df_name + "_clean")
         if exist:
             return df_name + "_clean"
-        super(DefaultProcessService, self).clean(df_name, self.CLEAN_RULES)
+        super(DefaultProcessService, self).clean(df_name, self.CLEAN_RULES, progress_bar)
+        progress_bar.progress(60)
         super(DefaultProcessService, self).feature_eng(df_name+"_clean", self.FEA_RULES)
+        progress_bar.progress(80)
         self.repo.delete_table(df_name)
         return df_name + "_clean"

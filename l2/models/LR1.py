@@ -31,7 +31,7 @@ def model():
                 '45-64':2,
                 '65-74':3,
                 '75+':4}
-    # Replace original column values with the mapped values
+    # Replace temp column values with the mapped values
     df['age_group'] = df['age_group'].map(enc_age_dict)
     
     # Covid 

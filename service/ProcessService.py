@@ -28,7 +28,7 @@ class ProcessService:
     def __init__(self, repo):
         self.repo = repo
 
-    def clean(self, df_name: str, rules: dict):
+    def clean(self, df_name: str, rules: dict, progress_bar=None):
         logger.debug("cleaning the dataset by rules %s", str(rules))
         cleaned_table = df_name + "_clean"
 
@@ -50,6 +50,9 @@ class ProcessService:
                   % (cleaned_table, col, self.repo.get_datatype(rules["retype"][col]))
             logger.debug(sql)
             self.repo.execute_without_result(sql)
+
+        if progress_bar is not None:
+            progress_bar.progress(20)
 
         # filters
         for col in rules["filters"].keys():

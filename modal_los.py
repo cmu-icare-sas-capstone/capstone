@@ -103,7 +103,7 @@ df = pd.concat([df.drop(labels=['ccs_diagnosis_code'],axis=1),ccs_diagnosis_enco
 
 # Age Group (5 age groups)
 enc_age_dict = {'0-17':0,'18-44':1,'45-64':2,'65-74':3,'75+':4} # Define a dictionary for encoding target variable
-df['age_group'] = df['age_group'].map(enc_age_dict) # Replace original column values with the mapped values
+df['age_group'] = df['age_group'].map(enc_age_dict) # Replace temp column values with the mapped values
 
 X = df.iloc[:, 3:-1]
 y = df['length_of_stay']
