@@ -11,24 +11,26 @@ logger = get_logger(__name__)
 default_process_service = state.get("default_process_service")
 
 
-def create_data_cleaning_page():
+def dataset_page():
     col1, col2 = st.columns([1, 3])
     with col1:
         section = st.selectbox(
             label="Selection File Type",
             options=("Structured Data", "Public Comments"),
         )
-    if section == "Structured Data":
-        structured_data_section()
-    elif section == "Public Comments":
-        structured_data_section()
+    col3, col4 = st.columns([5, 3])
+    with col3:
+        if section == "Structured Data":
+            structured_data_section()
+        elif section == "Public Comments":
+            comments_file_section()
 
 
 def structured_data_section():
     is_default: bool = False
     uploaded_df: DataFrame()
-    cleaned_table_name = session_state.get("cleaned_table_name")
-    table_name = upload_structured_file()
+    cleaned_table_name = session_state.get("structured_data_clean")
+    table_name = upload_file("structured_data")
     logger.debug("Get uploaded file: %s" % table_name)
 
     default_dataset_info_holder = st.empty()
@@ -45,7 +47,7 @@ def structured_data_section():
                 structured_data_progress_bar.progress(100)
                 structured_data_progress_bar.empty()
                 logger.debug(repo.read_df(cleaned_table_name).head())
-                session_state.put("uploaded_file_clean", cleaned_table_name)
+                session_state.put("structured_data_clean", cleaned_table_name)
         else:
             st.warning("The file is not valid as a default dataset")
 
@@ -66,25 +68,30 @@ def structured_data_section():
 
 
 # upload the file if there isn't one, otherwise return the existing one
-def upload_structured_file():
+def upload_file(filename):
+    filename_clean = filename + "_clean"
+
     def change_file():
-        session_state.remove("uploaded_file")
-        session_state.remove("uploaded_file_clean")
-        repo.remove_df("uploaded_file")
-        repo.remove_df("uploaded_file_clean")
+        session_state.remove(filename)
+        session_state.remove(filename_clean)
+        repo.remove_df(filename)
+        repo.remove_df(filename_clean)
 
     uploaded_file = st.file_uploader("Choose a File", on_change=change_file)
     with st.spinner(text="Uploading and analyzing the file"):
-        if session_state.get("uploaded_file") is not None:
-            return session_state.get("uploaded_file")
+        if session_state.get(filename) is not None:
+            return session_state.get(filename)
         elif uploaded_file is not None:
             df = pd.read_csv(uploaded_file, low_memory=False)
-            repo.save_df(df, "uploaded_file")
-            session_state.put("uploaded_file", "uploaded_file")
-            return "uploaded_file"
+            repo.save_df(df, filename)
+            session_state.put(filename, filename)
+            return filename
 
     return None
 
 
+
+
 def comments_file_section():
+    upload_file("public_comments")
     print()
