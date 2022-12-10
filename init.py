@@ -60,5 +60,6 @@ elif app_config.env == "test":
         meta_data_repo.add_meta_data(
             table_name,
             ["age_group, race, facility_id, ccs_diagnosis_description"],
+
             ["length_of_stay", "total_costs", "long_stay"]
         )

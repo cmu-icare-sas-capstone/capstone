@@ -31,6 +31,7 @@ def create_spider_graph(cube):
     facilities = repo.get_values_of_one_column(cube.cube_name, "facility_id")
     facilities = [x.replace(".0", "\0") for x in facilities]
 
+
     count_df = cube.cube_data.groupby(['facility_id'])['length_of_stay'].agg('count').to_frame('count').reset_index()
 
     traces_df = []
@@ -67,5 +68,4 @@ def create_spider_graph(cube):
             )),
         showlegend=True
     )
-
     st.plotly_chart(fig)
