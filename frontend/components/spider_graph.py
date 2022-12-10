@@ -67,5 +67,4 @@ def create_spider_graph(cube):
             )),
         showlegend=True
     )
-
     st.plotly_chart(fig)
