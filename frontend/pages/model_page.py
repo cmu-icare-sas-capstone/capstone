@@ -20,19 +20,20 @@ def create_model_page():
 
 
     #add CorreM. 
-    df = pd.read_pickle(".\data\pickles\clean_test")
-    corrM1 = df.corr() 
-    corrM = corrM1[['total_costs', 'length_of_stay']]
-    pd.set_option("display.max_columns", None)
-    fig, ax = plt.subplots(figsize=(10,40))  
-    sns.heatmap(corrM, annot=True)
-    plt.title(' TOTAL_COSTS                     LENGTH_OF_STAY')
-    fig.show()
-    st.pyplot(fig)
+    df = pd.read_pickle("data/pickles/test_data")
+    with st.expander("Correlation"):
+        corrM1 = df.corr()
+        corrM = corrM1[['total_costs', 'length_of_stay']]
+        pd.set_option("display.max_columns", None)
+        fig, ax = plt.subplots(figsize=(10,30))
+        sns.heatmap(corrM, annot=True)
+        plt.title(' TOTAL_COSTS                     LENGTH_OF_STAY')
+        fig.show()
+        st.pyplot(fig)
 
     model = st.selectbox(
         label="Model",
-        options=("ridge", "XGBoost")
+        options=("Ridge", "Linear")
     )
 
     with st.expander("Model Input"):
@@ -195,31 +196,55 @@ def create_model_page():
         "average_of_bene_avg_risk_scre_2019_physician_other_providers_puf": hcc_code
     }, ignore_index=True)
     x = x.fillna(0)
-    print(x.columns)
+
     sigma = 0
-    if model == "ridge":
+    f = None
+    f_c = None
+    if model == "Ridge":
         sigma = 9.74
         with open("./model/ridge.pkl", 'rb') as file:
             f = pickle.load(file)
-    elif model == "XGBoost":
-        sigma = 16.91
-        with open("./model/xgb_model.pkl", 'rb') as file:
-            f = pickle.load(file)
+    # elif model == "XGBoost":
+    #     sigma = 16.91
+    #     with open("./model/xgb_model.pkl", 'rb') as file:
+    #         f = pickle.load(file)
     elif model == "Linear":
         sigma = 9.74
+        sigma_cost = 0.54
+        with open("./model/lr_model.pkl", 'rb') as file:
+            f = pickle.load(file)
+        with open("./model/lr_model_cost.pkl", "rb") as file:
+            f_c = pickle.load(file)
 
     predict_value = f.predict(x)
+    predict_costs = None
+    if f_c is not None:
+        x["length_of_stay"] = predict_value
+        predict_costs = f_c.predict(x)
+        predict_costs = math.pow(2, predict_costs)
+
     if predict_value < 0:
         predict_value = 0
 
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.metric("Estimation", value="%.2f" % predict_value)
+        st.metric("Estimated LOS", value="%.2f" % predict_value)
+        if predict_costs is not None:
+            st.metric("Estimated Costs", value="%.2f" % predict_costs)
     with col2:
         st.metric("MSE", value=sigma)
+        if predict_costs is not None:
+            st.metric("MAE ", value="%.2f" % sigma_cost)
     with col3:
-        st.metric("95% Estimation Range",
+        st.metric("95% Confidence Interval",
                   value="[%.2f, %.2f]" % (max(0, predict_value-1.96*math.sqrt(sigma)), predict_value+1.96*math.sqrt(sigma)))
+        # if predict_costs is not None:
+        #     if predict_costs - 1.96 * sigma_cost > 0:
+        #         low_bound = 2**(predict_costs - 1.96 * sigma_cost)
+        #     else:
+        #         low_bound = 0
+        #     upper_bound = 2**(predict_costs+1.96*sigma_cost)
+        #     st.metric("95% Confidence Interval", value="[%.2f, %.2f]" % (low_bound, upper_bound))
 
     with st.expander("Model Analysis"):
         if model == "ridge":

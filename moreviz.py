@@ -1,96 +1,97 @@
 # -*- coding: utf-8 -*-
-# """
-# Created on Wed Nov 16 21:50:40 2022
-#
-# @author: mengy
-# """
-# import pandas as pd
-# from folium.plugins import HeatMap
-# import folium as folium
-# import streamlit.components.v1 as components
-# import pickle
-# import seaborn as sns
-# import matplotlib
-# matplotlib.use('TkAgg')
-# import matplotlib.pyplot as plt
-# import streamlit as st
-# #============================================================feature importance
-# # m = folium.Map([lat, lon], tiles='cartodbpositron', zoom_start=9)
-# # HeatMap(long_staydf).add_to(m)
-# # components.html(m._repr_html_(), width=1400, height=1000)
-#
-# pickled_model = pickle.load(open('model/ridge.pkl', 'rb'))
+"""
+Created on Wed Nov 16 21:50:40 2022
+
+@author: mengy
+"""
+import pandas as pd
+from folium.plugins import HeatMap
+import folium as folium
+import streamlit.components.v1 as components
+import pickle
+import seaborn as sns
+import matplotlib.pyplot as plt
+import streamlit as st
+
+# ============================================================feature importance
+# m = folium.Map([lat, lon], tiles='cartodbpositron', zoom_start=9)
+# HeatMap(long_staydf).add_to(m)
+# components.html(m._repr_html_(), width=1400, height=1000)
+
+# pickled_model = pickle.load(open('linear.pkl', 'rb'))
 # # print(pickled_model.coef_)
 # coeff = pickled_model.coef_.tolist()
-# X = ['age_group', 'apr_severity_of_illness_code', 'covid_hosp',
-#        'covid_risk_factor', 'gender_M', 'race_Multi-racial', 'race_Other Race',
-#        'race_White', 'ethnicity_Not Span/Hispanic',
-#        'ethnicity_Spanish/Hispanic', 'ethnicity_Unknown',
-#        'type_of_admission_Trauma', 'type_of_admission_Urgent',
-#        'payment_typology_1_Federal/State/Local/VA',
-#        'payment_typology_1_Medicaid', 'payment_typology_1_Medicare',
-#        'patient_disposition_Cancer Center or Children\'s Hospital',
-#        'patient_disposition_Court/Law Enforcement',
-#        'patient_disposition_Critical Access Hospital',
-#        'patient_disposition_Expired',
-#        'patient_disposition_Facility w/ Custodial/Supportive Care',
-#        'patient_disposition_Home or Self Care',
-#        'patient_disposition_Home w/ Home Health Services',
-#        'patient_disposition_Hospice - Home',
-#        'patient_disposition_Hospice - Medical Facility',
-#        'patient_disposition_Inpatient Rehabilitation Facility',
-#        'patient_disposition_Left Against Medical Advice',
-#        'patient_disposition_Medicaid Cert Nursing Facility',
-#        'patient_disposition_Medicare Cert Long Term Care Hospital',
-#        'patient_disposition_Psychiatric Hospital or Unit of Hosp',
-#        'patient_disposition_Short-term Hospital',
-#        'patient_disposition_Skilled Nursing Home', 'apr_drg_code_165',
-#        'apr_drg_code_166', 'apr_drg_code_167', 'apr_drg_code_169',
-#        'apr_drg_code_171', 'apr_drg_code_173', 'apr_drg_code_175',
-#        'apr_drg_code_180', 'apr_drg_code_191', 'apr_drg_code_197',
-#        'apr_drg_code_24', 'apr_drg_code_26', 'apr_drg_code_305',
-#        'apr_drg_code_309', 'apr_drg_code_310', 'apr_drg_code_312',
-#        'apr_drg_code_313', 'apr_drg_code_314', 'apr_drg_code_316',
-#        'apr_drg_code_317', 'apr_drg_code_320', 'apr_drg_code_321',
-#        'apr_drg_code_344', 'apr_drg_code_351', 'apr_drg_code_361',
-#        'apr_drg_code_364', 'apr_drg_code_380', 'apr_drg_code_4',
-#        'apr_drg_code_405', 'apr_drg_code_420', 'apr_drg_code_424',
-#        'apr_drg_code_440', 'apr_drg_code_444', 'apr_drg_code_447',
-#        'apr_drg_code_468', 'apr_drg_code_48', 'apr_drg_code_5',
-#        'apr_drg_code_6', 'apr_drg_code_710', 'apr_drg_code_73',
-#        'apr_drg_code_82', 'apr_drg_code_890', 'apr_drg_code_892',
-#        'apr_drg_code_894', 'apr_drg_code_950', 'apr_drg_code_951',
-#        'apr_drg_code_952', 'apr_mdc_code_10', 'apr_mdc_code_11',
-#        'apr_mdc_code_18', 'apr_mdc_code_2', 'apr_mdc_code_24',
-#        'apr_mdc_code_5', 'apr_mdc_code_8', 'apr_mdc_code_9']
+# X = ['age_group', 'apr_severity_of_illness_code', 'cdc_2018_overall_svi',
+#      'sum_countunique_rndrng_npi_physician_other_providers', 'covid_hosp',
+#      'long_stay', 'gender_M', 'race_Multi-racial', 'race_Other Race',
+#      'race_White', 'covid_True', 'ethnicity_Not Span/Hispanic',
+#      'ethnicity_Spanish/Hispanic', 'ethnicity_Unknown',
+#      'type_of_admission_Trauma', 'type_of_admission_Urgent',
+#      'payment_typology_1_Federal/State/Local/VA',
+#      'payment_typology_1_Medicaid', 'payment_typology_1_Medicare',
+#      'patient_disposition_Cancer Center or Children\'s Hospital',
+#      'patient_disposition_Court/Law Enforcement',
+#      'patient_disposition_Critical Access Hospital',
+#      'patient_disposition_Expired',
+#      'patient_disposition_Facility w/ Custodial/Supportive Care',
+#      'patient_disposition_Home or Self Care',
+#      'patient_disposition_Home w/ Home Health Services',
+#      'patient_disposition_Hospice - Home',
+#      'patient_disposition_Hospice - Medical Facility',
+#      'patient_disposition_Inpatient Rehabilitation Facility',
+#      'patient_disposition_Left Against Medical Advice',
+#      'patient_disposition_Medicaid Cert Nursing Facility',
+#      'patient_disposition_Medicare Cert Long Term Care Hospital',
+#      'patient_disposition_Psychiatric Hospital or Unit of Hosp',
+#      'patient_disposition_Short-term Hospital',
+#      'patient_disposition_Skilled Nursing Home', 'apr_drg_code_165',
+#      'apr_drg_code_166', 'apr_drg_code_167', 'apr_drg_code_169',
+#      'apr_drg_code_171', 'apr_drg_code_173', 'apr_drg_code_175',
+#      'apr_drg_code_180', 'apr_drg_code_191', 'apr_drg_code_197',
+#      'apr_drg_code_24', 'apr_drg_code_26', 'apr_drg_code_305',
+#      'apr_drg_code_309', 'apr_drg_code_310', 'apr_drg_code_312',
+#      'apr_drg_code_313', 'apr_drg_code_314', 'apr_drg_code_316',
+#      'apr_drg_code_317', 'apr_drg_code_320', 'apr_drg_code_321',
+#      'apr_drg_code_344', 'apr_drg_code_351', 'apr_drg_code_361',
+#      'apr_drg_code_364', 'apr_drg_code_380', 'apr_drg_code_4',
+#      'apr_drg_code_405', 'apr_drg_code_420', 'apr_drg_code_424',
+#      'apr_drg_code_440', 'apr_drg_code_444', 'apr_drg_code_447',
+#      'apr_drg_code_468', 'apr_drg_code_48', 'apr_drg_code_5',
+#      'apr_drg_code_6', 'apr_drg_code_710', 'apr_drg_code_73',
+#      'apr_drg_code_82', 'apr_drg_code_890', 'apr_drg_code_892',
+#      'apr_drg_code_894', 'apr_drg_code_950', 'apr_drg_code_951',
+#      'apr_drg_code_952', 'apr_mdc_code_10', 'apr_mdc_code_11',
+#      'apr_mdc_code_18', 'apr_mdc_code_2', 'apr_mdc_code_24',
+#      'apr_mdc_code_5', 'apr_mdc_code_8', 'apr_mdc_code_9']
 #
-# feat_dict= {}
-# for col, val in sorted(zip(X, coeff),key=lambda x:x[1],reverse=True):
-#   feat_dict[col]=val
+# feat_dict = {}
+# for col, val in sorted(zip(X, coeff), key=lambda x: x[1], reverse=True):
+#     feat_dict[col] = val
 #
-# feat_df = pd.DataFrame({'Feature':feat_dict.keys(),'Importance':feat_dict.values()})
-# feat_df_pos = feat_df.loc[feat_df['Importance'] > 0,:].sort_values("Importance", ascending = False)
-# feat_df_neg = feat_df.loc[feat_df['Importance'] < 0,:].sort_values("Importance", ascending = False)
+# feat_df = pd.DataFrame({'Feature': feat_dict.keys(), 'Importance': feat_dict.values()})
+# feat_df_pos = feat_df.loc[feat_df['Importance'] > 0, :].sort_values("Importance", ascending=False)
+# feat_df_neg = feat_df.loc[feat_df['Importance'] < 0, :].sort_values("Importance", ascending=False)
 #
 # featdf_postop = feat_df_pos.head(10)
 # featdf_negtop = feat_df_neg.tail(10)
 #
-# feat_dftop = pd.concat([featdf_postop,featdf_negtop],ignore_index=True)
+# feat_dftop = pd.concat([featdf_postop, featdf_negtop], ignore_index=True)
 #
 # values = feat_dftop.Importance
 # idx = feat_dftop.Feature
-# fig = plt.figure(figsize=(10,8))
-# clrs = ['green' if (x < max(values)) else 'red' for x in values ]
-# sns.barplot(y=idx,x=values,palette=clrs).set(title='Important features to predict LOS')
+# fig = plt.figure(figsize=(10, 8))
+# clrs = ['green' if (x < max(values)) else 'red' for x in values]
+# sns.barplot(y=idx, x=values, palette=clrs).set(title='Important features to predict LOS')
 # plt.show()
 #
-# # # st.pyplot(fig)
-# #
-# #
-# #
-# #====================word frequency bubble chart
+# # st.pyplot(fig)
+#
+#
+# # ====================word frequency bubble chart
 # import numpy as np
-# #ref https://matplotlib.org/3.5.0/gallery/misc/packed_bubbles.html
+#
+#
+# # ref https://matplotlib.org/3.5.0/gallery/misc/packed_bubbles.html
 # class BubbleChart:
 #     def __init__(self, area, bubble_spacing=0):
 #         """
@@ -138,7 +139,7 @@
 #     def outline_distance(self, bubble, bubbles):
 #         center_distance = self.center_distance(bubble, bubbles)
 #         return center_distance - bubble[2] - \
-#             bubbles[:, 2] - self.bubble_spacing
+#                bubbles[:, 2] - self.bubble_spacing
 #
 #     def check_collisions(self, bubble, bubbles):
 #         distance = self.outline_distance(bubble, bubbles)
@@ -224,22 +225,27 @@
 #             ax.text(*self.bubbles[i, :2], labels[i],
 #                     horizontalalignment='center', verticalalignment='center')
 #
-# overall = [('services', 33062), ('cms', 28732), ('patients', 22148), ('health', 19614), ('care', 18837), ('medicare', 17899), ('access', 16054), ('cuts', 15917), ('management', 15208), ('therapy', 13823)]
 #
-# adjs = [('behavioral', 8567), ('physical', 7607), ('mental', 7132), ('new', 5060), ('patient', 4928), ('underserved', 4749), ('additional', 4053), ('remote', 3828), ('digital', 3632), ('rural', 3571)]
+# overall = [('services', 33062), ('cms', 28732), ('patients', 22148), ('health', 19614), ('care', 18837),
+#            ('medicare', 17899), ('access', 16054), ('cuts', 15917), ('management', 15208), ('therapy', 13823)]
 #
-# nouns = [('services', 32921), ('patients', 22113), ('health', 19471), ('care', 18588), ('management', 15206), ('therapy', 13821), ('access', 13364), ('cuts', 13313), ('codes', 13282), ('psychologists', 10406)]
+# adjs = [('behavioral', 8567), ('physical', 7607), ('mental', 7132), ('new', 5060), ('patient', 4928),
+#         ('underserved', 4749), ('additional', 4053), ('remote', 3828), ('digital', 3632), ('rural', 3571)]
 #
-# verbs = [('proposed', 12374), ('urge', 6682), ('provided', 6444), ('ensure', 5038), ('allow', 4672), ('support', 4426), ('ask', 3921), ('appreciate', 3022), ('recognize', 2741), ('underutilized', 2739)]
+# nouns = [('services', 32921), ('patients', 22113), ('health', 19471), ('care', 18588), ('management', 15206),
+#          ('therapy', 13821), ('access', 13364), ('cuts', 13313), ('codes', 13282), ('psychologists', 10406)]
+#
+# verbs = [('proposed', 12374), ('urge', 6682), ('provided', 6444), ('ensure', 5038), ('allow', 4672), ('support', 4426),
+#          ('ask', 3921), ('appreciate', 3022), ('recognize', 2741), ('underutilized', 2739)]
 #
 # ##overall
 # word_dict = {}
 # colors = ['#5A69AF', '#579E65', '#F9C784', '#FC944A',
-#               '#F24C00', '#00B825', '#FC944A', '#EF4026',
-#               'goldenrod','green', '#F9C784', '#FC944A',
-#               'coral']
+#           '#F24C00', '#00B825', '#FC944A', '#EF4026',
+#           'goldenrod', 'green', '#F9C784', '#FC944A',
+#           'coral']
 # keys = [i[0] for i in overall]
-# values = [i[1]/18837 for i in overall]
+# values = [i[1] / 18837 for i in overall]
 # word_dict['word'] = keys
 # word_dict['frequency'] = values
 # word_dict['color'] = colors[:len(keys)]
@@ -256,22 +262,12 @@
 # ax.relim()
 # ax.autoscale_view()
 # plt.show()
-#
+
 # st.pyplot(fig)
 
-
-
-
-
-
 # ========================spyder chart
-import pandas as pd
 import plotly.graph_objects as go
-import init
-from bean.GlobalState import state
-
-repo = state.get("repo")
-df = repo.read_df("default_data_clean")
+df = pd.read_pickle('data/pickles/data7_0')
 
 categories = df['facility_id'].tolist()
 categories = [i.split(".")[0] for i in categories]
@@ -280,7 +276,6 @@ df['facility_id'] = categories
 categories = df['facility_id'].drop_duplicates().sort_values().tolist()[:10]
 
 #first trace: avg los
-print(df.groupby(['facility_id'])['length_of_stay'].agg('mean').to_frame('avgLos'))
 avgLos = df.groupby(['facility_id'])['length_of_stay'].agg('mean').to_frame('avgLos').reset_index()
 
 #second trace: %long stay
@@ -294,23 +289,24 @@ avgTC = df.groupby(['facility_id'])['total_costs'].agg('mean').to_frame('avgTC')
 
 fig = go.Figure()
 
+categories = [x+"\0" for x in categories]
 fig.add_trace(go.Scatterpolar(
       r=avgLos['avgLos'].tolist()[:10],
-      theta=categories,
+    theta=categories,
       fill='toself',
       name='AvgLOS'
 ))
 
 fig.add_trace(go.Scatterpolar(
       r=aggdf['percentage_long_stay'].tolist()[:10],
-      theta=categories,
+        theta=categories,
       fill='toself',
       name='%LongLOS'
 ))
 
 fig.add_trace(go.Scatterpolar(
       r=[i/1000 for i in avgTC['avgTC'].tolist()[:10]],
-      theta=categories,
+theta=categories,
       fill='toself',
       name='AvgTotalCost'
 ))
@@ -324,52 +320,90 @@ fig.update_layout(
 )
 
 fig.show()
+# import plotly.graph_objects as go
+# from plotly.subplots import make_subplots
+# #
+# fig = make_subplots(rows=2, cols=2, specs=[[{'type': 'polar'}]*2]*2)
+#
+# fig.add_trace(go.Scatterpolar(
+#       name = "angular categories",
+#         r=[0.5, 1, 2, 2.5, 3, 4],
+#         theta = ["a","b","c","d","e","f"],
+#     ))
+#
+# fig.update_traces(fill='toself')
+# fig.update_layout(
+#     polar = dict(
+#       # radialaxis_angle = -45,
+#       # angularaxis = dict(
+#       #   direction = "clockwise",
+#       #   period = 6)
+#     )
+# )
+#
+# fig.show()
+
+# fig = go.Figure(data=
+#     go.Scatterpolar(
+#         r = [0.5,1,2,2.5,3,4],
+#         theta = [35,70,120,155,205,240],
+#         mode = 'markers',
+#     ))
+#
+# fig.add_trace(go.Scatterpolar(
+#       name = "angular categories",
+#       r = [5, 4, 2, 4, 5],
+#       theta = ["a", "b", "c", "d", "a"],
+#     ))
+#
+# fig.update_traces(fill='toself')
+#
+# fig.show()
+#
+# fig.update_layout(showlegend=False)
+# fig.show()
+# import plotly.express as px
+# import pandas as pd
+
+# categories = ['Rolling Resistance','Comfort','Noise',
+#             'Wear', 'Traction','Handling']
+# fig = go.Figure()
+
+# #product 1
+# fig.add_trace(go.Scatterpolar(
+#       r=[105, 100, 100, 110, 95, 100],
+#       theta=categories,
+#       fill='toself',
+#       name='Product A'
+# ))
+
+# #product 2
+# fig.add_trace(go.Scatterpolar(
+#       r=[95, 100, 100, 100, 105, 100],
+#       theta=categories,
+#       fill='toself',
+#       name='Product B'
+# ))
+
+# #product 3
+# fig.add_trace(go.Scatterpolar(
+#       r=[100, 100, 95, 100, 100, 110],
+#       theta=categories,
+#       fill='toself',
+#       name='Product B'
+# ))
+
+# #customization of chart
+# fig.update_layout(
+#   polar=dict(
+#     radialaxis=dict(
+#       visible=True,
+#       range=[90, 115]
+#     )),
+#   showlegend=False
+# )
 
 
-#
-#
-# # import plotly.express as px
-# # import pandas as pd
-#
-# # categories = ['Rolling Resistance','Comfort','Noise',
-# #             'Wear', 'Traction','Handling']
-# # fig = go.Figure()
-#
-# # #product 1
-# # fig.add_trace(go.Scatterpolar(
-# #       r=[105, 100, 100, 110, 95, 100],
-# #       theta=categories,
-# #       fill='toself',
-# #       name='Product A'
-# # ))
-#
-# # #product 2
-# # fig.add_trace(go.Scatterpolar(
-# #       r=[95, 100, 100, 100, 105, 100],
-# #       theta=categories,
-# #       fill='toself',
-# #       name='Product B'
-# # ))
-#
-# # #product 3
-# # fig.add_trace(go.Scatterpolar(
-# #       r=[100, 100, 95, 100, 100, 110],
-# #       theta=categories,
-# #       fill='toself',
-# #       name='Product B'
-# # ))
-#
-# # #customization of chart
-# # fig.update_layout(
-# #   polar=dict(
-# #     radialaxis=dict(
-# #       visible=True,
-# #       range=[90, 115]
-# #     )),
-# #   showlegend=False
-# # )
-#
-#
-# # fig.show()
-#
-# # st.pyplot(fig)
+# fig.show()
+
+# st.pyplot(fig)

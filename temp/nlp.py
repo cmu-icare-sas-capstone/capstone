@@ -20,7 +20,7 @@ from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from transformers import pipeline
 
 
-df = pd.read_csv("data/files/CMS_PUBLIC_COMMENTS_2022_7-9.csv")
+df = pd.read_csv("../data/files/CMS_PUBLIC_COMMENTS_2022_7-9.csv")
 df = df.dropna(thresh=df.shape[0]*0.8, axis=1)
 df = df.dropna(subset=['Comment'])
 df.drop_duplicates(subset=["Comment"], keep='first', inplace=True)

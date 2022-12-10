@@ -24,10 +24,12 @@ def create_spider_graph(cube):
         group_by_selection_box = st.multiselect(
             "Group By",
             options=("facility_id",),
+            default="facility_id",
             key="cube_viewer_group_" + cube.cube_name
         )
 
     facilities = repo.get_values_of_one_column(cube.cube_name, "facility_id")
+    facilities = [x.replace(".0", "\0") for x in facilities]
 
     count_df = cube.cube_data.groupby(['facility_id'])['length_of_stay'].agg('count').to_frame('count').reset_index()
 
@@ -39,7 +41,6 @@ def create_spider_graph(cube):
             long_stay_df = cube.cube_data.groupby(['facility_id'])[val].agg('sum').to_frame("sum").reset_index()
             long_stay_df = pd.merge(count_df, long_stay_df, on='facility_id', how='outer')
             long_stay_df[val] = long_stay_df["sum"] / long_stay_df["count"] * 100
-            print(long_stay_df)
             traces_df.append(long_stay_df)
         else:
             traces_df.append(cube.cube_data.groupby(['facility_id'])[val].agg('mean').to_frame(val).reset_index())
@@ -51,7 +52,6 @@ def create_spider_graph(cube):
             r = [x/1000 for x in traces_df[i][value_selection_box[i]].tolist()]
         else:
             r = traces_df[i][value_selection_box[i]].tolist()
-            print(r)
         fig.add_trace(go.Scatterpolar(
             r=r,
             theta=facilities,
@@ -59,13 +59,13 @@ def create_spider_graph(cube):
             name=value_selection_box[i]
         ))
 
-    # fig.update_layout(
-    #     polar=dict(
-    #         radialaxis=dict(
-    #             visible=True,
-    #             range=[0, 55]
-    #         )),
-    #     showlegend=True
-    # )
+    fig.update_layout(
+        polar=dict(
+            radialaxis=dict(
+                visible=True,
+                range=[0, 55]
+            )),
+        showlegend=True
+    )
 
     st.plotly_chart(fig)
