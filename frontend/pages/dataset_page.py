@@ -90,8 +90,6 @@ def upload_file(filename):
     return None
 
 
-
-
 def comments_file_section():
     upload_file("public_comments")
     print()
