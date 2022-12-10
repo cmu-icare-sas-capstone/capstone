@@ -5,6 +5,9 @@ import pickle
 import matplotlib.pyplot as plt
 import seaborn as sns
 from pypika import Query, Table, Field
+import math
+from scipy.stats import norm
+import numpy as np
 repo = state.get("repo")
 meta_data_repo = state.get("meta_data_repo")
 
@@ -17,19 +20,20 @@ def create_model_page():
 
 
     #add CorreM. 
-    df = pd.read_pickle(".\data\pickles\clean_test")
-    corrM1 = df.corr() 
-    corrM = corrM1[['total_costs', 'length_of_stay']]
-    pd.set_option("display.max_columns", None)
-    fig, ax = plt.subplots(figsize=(10,40))  
-    sns.heatmap(corrM, annot=True)
-    plt.title(' TOTAL_COSTS                     LENGTH_OF_STAY')
-    fig.show()
-    st.pyplot(fig)
+    df = pd.read_pickle("data/pickles/test_data")
+    with st.expander("Correlation"):
+        corrM1 = df.corr()
+        corrM = corrM1[['total_costs', 'length_of_stay']]
+        pd.set_option("display.max_columns", None)
+        fig, ax = plt.subplots(figsize=(10,30))
+        sns.heatmap(corrM, annot=True)
+        plt.title(' TOTAL_COSTS                     LENGTH_OF_STAY')
+        fig.show()
+        st.pyplot(fig)
 
     model = st.selectbox(
         label="Model",
-        options=("ridge", "XGBoost")
+        options=("Ridge", "Linear")
     )
 
     with st.expander("Model Input"):
@@ -127,12 +131,18 @@ def create_model_page():
             }
         )[0]
 
-    columns = ['age_group', 'apr_severity_of_illness_code', 'covid_hosp',
-       'covid_risk_factor', 'gender_M', 'race_Multi-racial', 'race_Other Race',
-       'race_White', 'ethnicity_Not Span/Hispanic',
-       'ethnicity_Spanish/Hispanic', 'ethnicity_Unknown',
-       'type_of_admission_Trauma', 'type_of_admission_Urgent',
-       'payment_typology_1_Federal/State/Local/VA',
+        number_of_physician = st.text_input(label="number of physician", value=25)
+        hcc_code = st.text_input(label="HCC Code", value=1.8)
+
+
+    columns = ['age_group', 'apr_severity_of_illness_code',
+       'sum_countunique_rndrng_npi_physician_other_providers',
+       'average_of_bene_avg_risk_scre_2019_physician_other_providers_puf',
+       'covid_hosp', 'long_stay', 'gender_M', 'race_Multi-racial',
+       'race_Other Race', 'race_White', 'covid_True',
+       'ethnicity_Not Span/Hispanic', 'ethnicity_Spanish/Hispanic',
+       'ethnicity_Unknown', 'type_of_admission_Trauma',
+       'type_of_admission_Urgent', 'payment_typology_1_Federal/State/Local/VA',
        'payment_typology_1_Medicaid', 'payment_typology_1_Medicare',
        'patient_disposition_Cancer Center or Children\'s Hospital',
        'patient_disposition_Court/Law Enforcement',
@@ -174,7 +184,6 @@ def create_model_page():
         "age_group": age_group,
         "apr_severity_of_illness_code": apr_severity_of_illness_code,
         "covid_hosp": covid_hosp,
-        "covid_risk_factor": 1,
         "gender_M": gender_M,
         "race_"+race: 1,
         "ethnicity_"+ethnicity: 1,
@@ -182,22 +191,60 @@ def create_model_page():
         "payment_typology_1_"+payment_typology: 1,
         "patient_disposition_"+patient_disposition: 1,
         "apr_drg_code_"+str(apr_drg_code): 1,
-        "apr_mdc_code_"+str(apr_mdc_code): 1
+        "apr_mdc_code_"+str(apr_mdc_code): 1,
+        "sum_countunique_rndrng_npi_physician_other_providers": number_of_physician,
+        "average_of_bene_avg_risk_scre_2019_physician_other_providers_puf": hcc_code
     }, ignore_index=True)
     x = x.fillna(0)
 
-    if model == "ridge":
+    sigma = 0
+    f = None
+    f_c = None
+    if model == "Ridge":
+        sigma = 9.74
         with open("./model/ridge.pkl", 'rb') as file:
             f = pickle.load(file)
-    elif model == "XGBoost":
-        with open("./model/xgb_model.pkl", 'rb') as file:
+    # elif model == "XGBoost":
+    #     sigma = 16.91
+    #     with open("./model/xgb_model.pkl", 'rb') as file:
+    #         f = pickle.load(file)
+    elif model == "Linear":
+        sigma = 9.74
+        sigma_cost = 0.54
+        with open("./model/lr_model.pkl", 'rb') as file:
             f = pickle.load(file)
+        with open("./model/lr_model_cost.pkl", "rb") as file:
+            f_c = pickle.load(file)
 
     predict_value = f.predict(x)
+    predict_costs = None
+    if f_c is not None:
+        x["length_of_stay"] = predict_value
+        predict_costs = f_c.predict(x)
+        predict_costs = math.pow(2, predict_costs)
+
     if predict_value < 0:
         predict_value = 0
 
-    st.write("Estimated LOS: " + str(predict_value))
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric("Estimated LOS", value="%.2f" % predict_value)
+        if predict_costs is not None:
+            st.metric("Estimated Costs", value="%.2f" % predict_costs)
+    with col2:
+        st.metric("MSE", value=sigma)
+        if predict_costs is not None:
+            st.metric("MAE ", value="%.2f" % sigma_cost)
+    with col3:
+        st.metric("95% Confidence Interval",
+                  value="[%.2f, %.2f]" % (max(0, predict_value-1.96*math.sqrt(sigma)), predict_value+1.96*math.sqrt(sigma)))
+        # if predict_costs is not None:
+        #     if predict_costs - 1.96 * sigma_cost > 0:
+        #         low_bound = 2**(predict_costs - 1.96 * sigma_cost)
+        #     else:
+        #         low_bound = 0
+        #     upper_bound = 2**(predict_costs+1.96*sigma_cost)
+        #     st.metric("95% Confidence Interval", value="[%.2f, %.2f]" % (low_bound, upper_bound))
 
     with st.expander("Model Analysis"):
         if model == "ridge":

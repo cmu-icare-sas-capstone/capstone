@@ -46,6 +46,8 @@ if app_config.env == "dev" and app_config.process_default_data:
             ["age_group, race, facility_id, ccs_description_description"],
             ["length_of_stay", "total_costs", "long_stay"]
         )
+        df = repo.read_df("default_data_clean")
+        df.to_pickle("data7_0")
 
 
 elif app_config.env == "test":
@@ -57,6 +59,7 @@ elif app_config.env == "test":
         repo.save_df(df, "default_data_clean")
         meta_data_repo.add_meta_data(
             table_name,
-            ["age_group, race, facility_id, ccs_description_description"],
+            ["age_group, race, facility_id, ccs_diagnosis_description"],
+
             ["length_of_stay", "total_costs", "long_stay"]
         )

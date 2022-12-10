@@ -5,7 +5,8 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
-import old.l1.etl.DatabaseIO as dbio
+from sklearn import metrics
+import l1.etl.DatabaseIO as dbio
 
 def model():
     df = dbio.read_from_db('hospital_inpatient_discharges')    
@@ -16,12 +17,12 @@ def model():
     
     # Gender
     gender_male = pd.get_dummies(df['gender'], drop_first=True)
-    df = pd.concat([df.drop(labels=['gender'],axis=1), gender_male], axis=1)
+    df = pd.concat([df.drop(labels=['gender'],axis=1),gender_male],axis=1)
     df.rename(columns={'M': 'gender_male'}, inplace=True)
     
     # Race (4 races)
-    race_encode = pd.get_dummies(df['race'], drop_first=True)
-    df = pd.concat([df.drop(labels=['race'], axis=1), race_encode], axis=1)
+    race_encode = pd.get_dummies(df['race'],drop_first=True)
+    df = pd.concat([df.drop(labels=['race'],axis=1),race_encode],axis=1)
     
     # Age Group (5 age groups)
     # Define a dictionary for encoding target variable
@@ -30,11 +31,7 @@ def model():
                 '45-64':2,
                 '65-74':3,
                 '75+':4}
-<<<<<<< HEAD
     # Replace temp column values with the mapped values
-=======
-    # Replace original column values with the mapped values
->>>>>>> master
     df['age_group'] = df['age_group'].map(enc_age_dict)
     
     # Covid 
