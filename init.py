@@ -28,6 +28,8 @@ create_table = "CREATE TABLE metadata(name TEXT, values TEXT, dimensions TEXT)"
 repo.execute_without_result(create_table)
 create_table = "CREATE TABLE view(table_name TEXT, view_name TEXT, values TEXT, rules TEXT)"
 repo.execute_without_result(create_table)
+create_table = "CREATE TABLE comment_table(table_name TEXT)"
+repo.execute_without_result(create_table)
 
 logger.debug("adding default processing service")
 default_process_service = DefaultProcessService(repo)
@@ -60,6 +62,5 @@ elif app_config.env == "test":
         meta_data_repo.add_meta_data(
             table_name,
             ["age_group, race, facility_id, ccs_diagnosis_description"],
-
             ["length_of_stay", "total_costs", "long_stay"]
         )
