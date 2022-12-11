@@ -32,6 +32,9 @@ def create_bar_chart(cube):
     elif cal_selection_box == "Std":
         fig_df = groups.std().loc[:, cube_values]
 
+    if group_by_selection_box == "facility_id":
+        fig_df.index = [x.replace(".0", "\0") for x in fig_df.index]
+
     graph_col, description_col = st.columns([3, 2])
     with graph_col:
         fig = plotly.subplots.make_subplots(rows=2, cols=2)
