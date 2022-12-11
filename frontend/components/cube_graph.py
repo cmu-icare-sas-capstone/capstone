@@ -4,6 +4,7 @@ from repository.Cube import Cube
 from frontend.components import map_graph
 from frontend.components import spider_graph
 from frontend.components import bar_chart
+from frontend.components import pie_chart
 
 
 def create_cube_graph(cube: Cube):
@@ -21,3 +22,5 @@ def create_cube_graph(cube: Cube):
         spider_graph.create_spider_graph(cube)
     elif fig_selection_box == "Bar Chart":
         bar_chart.create_bar_chart(cube)
+    elif fig_selection_box == "Pie Chart":
+        pie_chart.create_pie_chart(cube)

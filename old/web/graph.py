@@ -192,9 +192,6 @@ def plot_distplot(y_real, y_predict, height, width, margin, title_text=None):
 def plot_bar(data, x, y, height, width, margin, title_text=None):
     fig = px.bar(data, x=x, y=y, color=x)
 
-    fig.update_layout(bargap=0.05, height=height, width=width, title_text=title_text, margin=dict(t=margin,
-                                                                                                  b=margin
-                                                                                                )
-    )
+    fig.update_layout(bargap=0.05, height=height, width=width, title_text=title_text, margin=dict(t=margin, b=margin))
 
     return fig
