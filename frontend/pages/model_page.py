@@ -18,14 +18,19 @@ def create_model_page():
         options=meta_data_repo.get_all_tables()
     )
 
+    if dataset is not None:
+        model_section(dataset)
 
-    #add CorreM. 
-    df = pd.read_pickle("data/pickles/test_data")
+
+def model_section(dataset):
+    # add CorreM.
+    df = repo.read_df(dataset + "_model")
+    df = df.astype(float)
     with st.expander("Correlation"):
         corrM1 = df.corr()
         corrM = corrM1[['total_costs', 'length_of_stay']]
         pd.set_option("display.max_columns", None)
-        fig, ax = plt.subplots(figsize=(10,30))
+        fig, ax = plt.subplots(figsize=(10, 30))
         sns.heatmap(corrM, annot=True)
         plt.title(' TOTAL_COSTS                     LENGTH_OF_STAY')
         fig.show()
@@ -78,13 +83,13 @@ def create_model_page():
         )
 
         tbl = Table(dataset)
-        q = Query\
-            .from_(tbl)\
-            .select("patient_disposition")\
+        q = Query \
+            .from_(tbl) \
+            .select("patient_disposition") \
             .where(
-                tbl.ccs_diagnosis_description.isin(
-                    ['Diabetes mellitus without complication', 'Diabetes mellitus with complications']))\
-            .where(tbl.patient_disposition != 'Another Type Not Listed')\
+            tbl.ccs_diagnosis_description.isin(
+                ['Diabetes mellitus without complication', 'Diabetes mellitus with complications'])) \
+            .where(tbl.patient_disposition != 'Another Type Not Listed') \
             .distinct()
 
         patient_disposition = st.selectbox(
@@ -134,50 +139,49 @@ def create_model_page():
         number_of_physician = st.text_input(label="number of physician", value=25)
         hcc_code = st.text_input(label="HCC Code", value=1.8)
 
-
     columns = ['age_group', 'apr_severity_of_illness_code',
-       'sum_countunique_rndrng_npi_physician_other_providers',
-       'average_of_bene_avg_risk_scre_2019_physician_other_providers_puf',
-       'covid_hosp', 'long_stay', 'gender_M', 'race_Multi-racial',
-       'race_Other Race', 'race_White', 'covid_True',
-       'ethnicity_Not Span/Hispanic', 'ethnicity_Spanish/Hispanic',
-       'ethnicity_Unknown', 'type_of_admission_Trauma',
-       'type_of_admission_Urgent', 'payment_typology_1_Federal/State/Local/VA',
-       'payment_typology_1_Medicaid', 'payment_typology_1_Medicare',
-       'patient_disposition_Cancer Center or Children\'s Hospital',
-       'patient_disposition_Court/Law Enforcement',
-       'patient_disposition_Critical Access Hospital',
-       'patient_disposition_Expired',
-       'patient_disposition_Facility w/ Custodial/Supportive Care',
-       'patient_disposition_Home or Self Care',
-       'patient_disposition_Home w/ Home Health Services',
-       'patient_disposition_Hospice - Home',
-       'patient_disposition_Hospice - Medical Facility',
-       'patient_disposition_Inpatient Rehabilitation Facility',
-       'patient_disposition_Left Against Medical Advice',
-       'patient_disposition_Medicaid Cert Nursing Facility',
-       'patient_disposition_Medicare Cert Long Term Care Hospital',
-       'patient_disposition_Psychiatric Hospital or Unit of Hosp',
-       'patient_disposition_Short-term Hospital',
-       'patient_disposition_Skilled Nursing Home', 'apr_drg_code_165',
-       'apr_drg_code_166', 'apr_drg_code_167', 'apr_drg_code_169',
-       'apr_drg_code_171', 'apr_drg_code_173', 'apr_drg_code_175',
-       'apr_drg_code_180', 'apr_drg_code_191', 'apr_drg_code_197',
-       'apr_drg_code_24', 'apr_drg_code_26', 'apr_drg_code_305',
-       'apr_drg_code_309', 'apr_drg_code_310', 'apr_drg_code_312',
-       'apr_drg_code_313', 'apr_drg_code_314', 'apr_drg_code_316',
-       'apr_drg_code_317', 'apr_drg_code_320', 'apr_drg_code_321',
-       'apr_drg_code_344', 'apr_drg_code_351', 'apr_drg_code_361',
-       'apr_drg_code_364', 'apr_drg_code_380', 'apr_drg_code_4',
-       'apr_drg_code_405', 'apr_drg_code_420', 'apr_drg_code_424',
-       'apr_drg_code_440', 'apr_drg_code_444', 'apr_drg_code_447',
-       'apr_drg_code_468', 'apr_drg_code_48', 'apr_drg_code_5',
-       'apr_drg_code_6', 'apr_drg_code_710', 'apr_drg_code_73',
-       'apr_drg_code_82', 'apr_drg_code_890', 'apr_drg_code_892',
-       'apr_drg_code_894', 'apr_drg_code_950', 'apr_drg_code_951',
-       'apr_drg_code_952', 'apr_mdc_code_10', 'apr_mdc_code_11',
-       'apr_mdc_code_18', 'apr_mdc_code_2', 'apr_mdc_code_24',
-       'apr_mdc_code_5', 'apr_mdc_code_8', 'apr_mdc_code_9']
+               'sum_countunique_rndrng_npi_physician_other_providers',
+               'average_of_bene_avg_risk_scre_2019_physician_other_providers_puf',
+               'covid_hosp', 'long_stay', 'gender_M', 'race_Multi-racial',
+               'race_Other Race', 'race_White', 'covid_True',
+               'ethnicity_Not Span/Hispanic', 'ethnicity_Spanish/Hispanic',
+               'ethnicity_Unknown', 'type_of_admission_Trauma',
+               'type_of_admission_Urgent', 'payment_typology_1_Federal/State/Local/VA',
+               'payment_typology_1_Medicaid', 'payment_typology_1_Medicare',
+               'patient_disposition_Cancer Center or Children\'s Hospital',
+               'patient_disposition_Court/Law Enforcement',
+               'patient_disposition_Critical Access Hospital',
+               'patient_disposition_Expired',
+               'patient_disposition_Facility w/ Custodial/Supportive Care',
+               'patient_disposition_Home or Self Care',
+               'patient_disposition_Home w/ Home Health Services',
+               'patient_disposition_Hospice - Home',
+               'patient_disposition_Hospice - Medical Facility',
+               'patient_disposition_Inpatient Rehabilitation Facility',
+               'patient_disposition_Left Against Medical Advice',
+               'patient_disposition_Medicaid Cert Nursing Facility',
+               'patient_disposition_Medicare Cert Long Term Care Hospital',
+               'patient_disposition_Psychiatric Hospital or Unit of Hosp',
+               'patient_disposition_Short-term Hospital',
+               'patient_disposition_Skilled Nursing Home', 'apr_drg_code_165',
+               'apr_drg_code_166', 'apr_drg_code_167', 'apr_drg_code_169',
+               'apr_drg_code_171', 'apr_drg_code_173', 'apr_drg_code_175',
+               'apr_drg_code_180', 'apr_drg_code_191', 'apr_drg_code_197',
+               'apr_drg_code_24', 'apr_drg_code_26', 'apr_drg_code_305',
+               'apr_drg_code_309', 'apr_drg_code_310', 'apr_drg_code_312',
+               'apr_drg_code_313', 'apr_drg_code_314', 'apr_drg_code_316',
+               'apr_drg_code_317', 'apr_drg_code_320', 'apr_drg_code_321',
+               'apr_drg_code_344', 'apr_drg_code_351', 'apr_drg_code_361',
+               'apr_drg_code_364', 'apr_drg_code_380', 'apr_drg_code_4',
+               'apr_drg_code_405', 'apr_drg_code_420', 'apr_drg_code_424',
+               'apr_drg_code_440', 'apr_drg_code_444', 'apr_drg_code_447',
+               'apr_drg_code_468', 'apr_drg_code_48', 'apr_drg_code_5',
+               'apr_drg_code_6', 'apr_drg_code_710', 'apr_drg_code_73',
+               'apr_drg_code_82', 'apr_drg_code_890', 'apr_drg_code_892',
+               'apr_drg_code_894', 'apr_drg_code_950', 'apr_drg_code_951',
+               'apr_drg_code_952', 'apr_mdc_code_10', 'apr_mdc_code_11',
+               'apr_mdc_code_18', 'apr_mdc_code_2', 'apr_mdc_code_24',
+               'apr_mdc_code_5', 'apr_mdc_code_8', 'apr_mdc_code_9']
     x = pd.DataFrame(columns=columns)
 
     x = x.append({
@@ -185,13 +189,13 @@ def create_model_page():
         "apr_severity_of_illness_code": apr_severity_of_illness_code,
         "covid_hosp": covid_hosp,
         "gender_M": gender_M,
-        "race_"+race: 1,
-        "ethnicity_"+ethnicity: 1,
-        "type_of_admission_"+type_of_admission: 1,
-        "payment_typology_1_"+payment_typology: 1,
-        "patient_disposition_"+patient_disposition: 1,
-        "apr_drg_code_"+str(apr_drg_code): 1,
-        "apr_mdc_code_"+str(apr_mdc_code): 1,
+        "race_" + race: 1,
+        "ethnicity_" + ethnicity: 1,
+        "type_of_admission_" + type_of_admission: 1,
+        "payment_typology_1_" + payment_typology: 1,
+        "patient_disposition_" + patient_disposition: 1,
+        "apr_drg_code_" + str(apr_drg_code): 1,
+        "apr_mdc_code_" + str(apr_mdc_code): 1,
         "sum_countunique_rndrng_npi_physician_other_providers": number_of_physician,
         "average_of_bene_avg_risk_scre_2019_physician_other_providers_puf": hcc_code
     }, ignore_index=True)
@@ -237,7 +241,8 @@ def create_model_page():
             st.metric("MAE ", value="%.2f" % sigma_cost)
     with col3:
         st.metric("95% Confidence Interval",
-                  value="[%.2f, %.2f]" % (max(0, predict_value-1.96*math.sqrt(sigma)), predict_value+1.96*math.sqrt(sigma)))
+                  value="[%.2f, %.2f]" % (
+                  max(0, predict_value - 1.96 * math.sqrt(sigma)), predict_value + 1.96 * math.sqrt(sigma)))
         # if predict_costs is not None:
         #     if predict_costs - 1.96 * sigma_cost > 0:
         #         low_bound = 2**(predict_costs - 1.96 * sigma_cost)

@@ -64,6 +64,10 @@ def structured_data_section():
         confirm_table = st.button(label="confirm")
         if confirm_table:
             meta_data_repo.add_meta_data(table_new_name, dimensions, values)
+            with st.spinner("Running feature engineering of models"):
+                model_feature_eng_progress_bar = st.progress(0)
+                default_process_service.model_feature_eng(cleaned_table_name, model_feature_eng_progress_bar)
+
     process_info_holder.empty()
 
 
