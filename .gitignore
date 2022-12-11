@@ -4,3 +4,5 @@ data
 .DS_Store
 *.pyc
 *.jar
+.git.bfg-report/
+temp_analysis.py
