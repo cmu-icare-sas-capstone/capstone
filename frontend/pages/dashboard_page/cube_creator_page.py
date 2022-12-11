@@ -33,12 +33,19 @@ def create_cube_creator_page():
             options=cube_list,
             key="available_cubes_selection_box",
         )
+
         if cube_selection_box is None:
             return
 
         selected_cube = Cube.get_cube(dataset_name, cube_selection_box)
 
     col3, col4 = st.columns([6, 4])
+
+    with col3:
+        if meta_data_repo.exists_view(selected_cube.cube_name, dataset_name):
+            if len(selected_cube.values) > 0:
+                dashboard.create_dashboard(dataset_name=dataset_name, selected_cube=selected_cube)
+
     with col4:
         cube_name = st.text_input(label="Cube Name", value=selected_cube.cube_name)
         col41, col42 = st.columns([2, 4])
@@ -57,10 +64,7 @@ def create_cube_creator_page():
         with col6:
             delete = st.button(label="Delete")
 
-    with col3:
-        if meta_data_repo.exists_view(selected_cube.cube_name, dataset_name):
-            if len(selected_cube.values) > 0:
-                dashboard.create_dashboard(dataset_name=dataset_name, selected_cube=selected_cube)
+
     # col_cube_creator, col_cube_list = st.columns([5, 5])
     #
 

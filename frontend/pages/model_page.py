@@ -10,7 +10,7 @@ from scipy.stats import norm
 import numpy as np
 repo = state.get("repo")
 meta_data_repo = state.get("meta_data_repo")
-
+default_process_service = state.get("default_process_service")
 
 def create_model_page():
     dataset = st.selectbox(
@@ -23,10 +23,15 @@ def create_model_page():
 
 
 def model_section(dataset):
-    # add CorreM.
-    df = repo.read_df(dataset + "_model")
-    df = df.astype(float)
-    with st.expander("Correlation"):
+    with st.expander("Variables Correlation"):
+        if not repo.exists_table(dataset+"_model"):
+            with st.spinner("Running feature engineering of models"):
+                model_feature_eng_progress_bar = st.progress(0)
+                default_process_service.model_feature_eng(dataset, model_feature_eng_progress_bar)
+                # add CorreM.
+        df = repo.read_df(dataset + "_model")
+        df = df.astype(float)
+
         corrM1 = df.corr()
         corrM = corrM1[['total_costs', 'length_of_stay']]
         pd.set_option("display.max_columns", None)
@@ -223,9 +228,9 @@ def model_section(dataset):
     predict_value = f.predict(x)
     predict_costs = None
     if f_c is not None:
-        x["length_of_stay"] = predict_value
-        predict_costs = f_c.predict(x)
-        predict_costs = math.pow(2, predict_costs)
+        x.insert(0, "length_of_stay", predict_value)
+        predict_costs_log = f_c.predict(x)
+        predict_costs = math.pow(2, predict_costs_log)
 
     if predict_value < 0:
         predict_value = 0
@@ -243,13 +248,10 @@ def model_section(dataset):
         st.metric("95% Confidence Interval",
                   value="[%.2f, %.2f]" % (
                   max(0, predict_value - 1.96 * math.sqrt(sigma)), predict_value + 1.96 * math.sqrt(sigma)))
-        # if predict_costs is not None:
-        #     if predict_costs - 1.96 * sigma_cost > 0:
-        #         low_bound = 2**(predict_costs - 1.96 * sigma_cost)
-        #     else:
-        #         low_bound = 0
-        #     upper_bound = 2**(predict_costs+1.96*sigma_cost)
-        #     st.metric("95% Confidence Interval", value="[%.2f, %.2f]" % (low_bound, upper_bound))
+        if predict_costs is not None:
+            low_bound = 2**(predict_costs_log - 1.96 * sigma_cost)
+            upper_bound = 2**(predict_costs_log + 1.96*sigma_cost)
+            st.metric("95% Confidence Interval", value="[%.2f, %.2f]" % (low_bound, upper_bound))
 
     with st.expander("Model Analysis"):
         if model == "ridge":

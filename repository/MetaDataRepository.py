@@ -11,9 +11,9 @@ class MetaDataRepository:
         df = self.repo.execute("SELECT * FROM %s LIMIT 5" % table_name)
         return df.columns
 
-    def add_meta_data(self, table_name, dimensions, values):
-        sql = "INSERT INTO %s VALUES ('%s', '%s', '%s')" \
-              % ("metadata", table_name, ",".join(values), ",".join(dimensions))
+    def add_meta_data(self, table_name, dimensions, values, size=0):
+        sql = "INSERT INTO %s VALUES ('%s', '%s', '%s', %s)" \
+              % ("metadata", table_name, ",".join(values), ",".join(dimensions), size)
         logger.debug(sql)
         self.repo.execute_without_result(sql)
 
@@ -60,4 +60,3 @@ class MetaDataRepository:
         logger.debug(sql)
         res = self.repo.execute_without_result(sql).fetchone()
         return bool(res[0])
-

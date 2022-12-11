@@ -24,6 +24,14 @@ def dataset_page():
             structured_data_section()
         elif section == "Public Comments":
             comments_file_section()
+    with col4:
+        st.subheader("Structured Dataset")
+        meta_data = repo.read_df("metadata")
+        st.table(data=meta_data)
+
+        st.subheader("Public Comments")
+        comment_tables = repo.read_df("comment_table")
+        st.table(data=comment_tables)
 
 
 def structured_data_section():
@@ -63,10 +71,9 @@ def structured_data_section():
         )
         confirm_table = st.button(label="confirm")
         if confirm_table:
-            meta_data_repo.add_meta_data(table_new_name, dimensions, values)
-            with st.spinner("Running feature engineering of models"):
-                model_feature_eng_progress_bar = st.progress(0)
-                default_process_service.model_feature_eng(cleaned_table_name, model_feature_eng_progress_bar)
+            size = session_state.get("structured_data_size")
+            meta_data_repo.add_meta_data(table_new_name, dimensions, values, size)
+            repo.alter_df_name("structured_data_clean", table_new_name)
 
     process_info_holder.empty()
 
@@ -74,19 +81,24 @@ def structured_data_section():
 # upload the file if there isn't one, otherwise return the existing one
 def upload_file(filename):
     filename_clean = filename + "_clean"
+    filename_size = filename + "_size"
 
     def change_file():
         session_state.remove(filename)
         session_state.remove(filename_clean)
+        session_state.remove(filename_size)
         repo.remove_df(filename)
-        repo.remove_df(filename_clean)
 
     uploaded_file = st.file_uploader("Choose a File", on_change=change_file)
+
     with st.spinner(text="Uploading and analyzing the file"):
         if session_state.get(filename) is not None:
             return session_state.get(filename)
         elif uploaded_file is not None:
+            size = len(uploaded_file.getvalue())
+            session_state.put(filename_size, size)
             df = pd.read_csv(uploaded_file, low_memory=False)
+            df = df.astype(str)
             repo.save_df(df, filename)
             session_state.put(filename, filename)
             return filename
@@ -95,5 +107,14 @@ def upload_file(filename):
 
 
 def comments_file_section():
-    upload_file("public_comments")
-    print()
+    comment_file = upload_file("public_comments")
+
+    if comment_file is not None:
+        default_process_service.extract_comments(comment_file)
+        size = session_state.get(comment_file+"_size")
+        table_new_name = st.text_input(label="comments set name", value="public_comments_clean")
+        if st.button("Confirm"):
+            sql = "INSERT INTO comment_table VALUES ('%s', %s)" % (table_new_name, size)
+            repo.execute(sql)
+            repo.alter_df_name("public_comments_clean", table_new_name)
+
