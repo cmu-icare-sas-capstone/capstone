@@ -42,17 +42,24 @@ def create_bar_chart(cube):
                 col=int(i % 2 + 1)
             )
 
+            if cube_values[i] == "length_of_stay":
+                fig.add_shape(type="line",
+                              xref="paper",
+                              x0=0, y0=5.150, x1=1, y1=5.150,
+                              line=dict(
+                                  color="blue",
+                                  dash="dash"
+                              ),)
+            if cube_values[i] == "total_costs":
+                fig.add_shape(type="line",
+                              xref="paper",
+                              x0=0, y0=12900, x1=1, y1=12900,
+                              line=dict(
+                                  color="red",
+                                  dash="dash"
+                              ),
+                              )
+
         fig.update_layout(barmode="group")
         fig.update_yaxes(showgrid=False)
-
         st.plotly_chart(fig)
-
-        # if fig_selection_box == "Pie Chart" and cal_selection_box == "Count":
-        #     fig = go.Figure(
-        #         data=[
-        #             go.Pie(labels=fig_df.index, values=fig_df.iloc[:, 0])
-        #         ]
-        #     )
-        #     fig.update_traces(hole=.4, hoverinfo="label+percent+name")
-        #     fig.update_layout(title_text=cube.cube_name)
-        #     st.plotly_chart(fig)
