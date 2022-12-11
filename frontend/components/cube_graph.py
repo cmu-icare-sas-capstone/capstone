@@ -9,7 +9,7 @@ from frontend.components import bar_chart
 def create_cube_graph(cube: Cube):
     cube_data: DataFrame = cube.cube_data
     cube_values: tuple = cube.values
-
+    print("Create cube graph")
     fig_selection_box = st.selectbox(
         "Select graph type",
         options=("Bar Chart", "Pie Chart", "Map", "Spider Map"),

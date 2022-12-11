@@ -18,7 +18,7 @@ df.loc[df['covid'] == '0', 'covid'] = 'FALSE'
 df.loc[df['covid'] == '1', 'covid'] = 'TRUE'
 
 # drop columns where there are only 1 or NAN values
-df = df.drop(columns=['ccs_diagnosis_description','primary_adm_diag','apr_mdc_description','apr_drg_description', "apr_severity_of_illness_code"])
+df = df.drop(columns=['ccs_diagnosis_description','primary_adm_diag','apr_mdc_description','apr_drg_description', "cdc_2018_overall_svi"])
 # drop the variables that are not useful in model: 'index', 'facility ID','zip code','area_name',attending_provider_license_number ''
 df = df.drop(columns=['area_name','zip_code_3_digits','attending_provider_license_number','fips_code_x','lat','lon'])
 # drop highly correlated columns
@@ -97,6 +97,7 @@ df['age_group'] = df['age_group'].map(enc_age_dict) #
 #     transform_target=True
 # )
 X = df.iloc[:, 2:-1]
+print(X.columns)
 y = df['total_costs']
 y = np.log2(y)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42)

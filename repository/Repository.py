@@ -20,7 +20,6 @@ class Repository:
         return self.repo.execute_without_result(sql)
 
     def save_df(self, df: DataFrame, name: str):
-        df = df.astype(str)
         self.repo.save_df(df, name)
 
     def read_df(self, name):
@@ -52,3 +51,6 @@ class Repository:
 
     def get_values_of_one_column_by_query(self, query):
         return self.repo.get_values_of_one_column_by_query(query)
+
+    def alter_df_name(self, oldname, newname):
+        self.repo.alter_table_name(oldname, newname)

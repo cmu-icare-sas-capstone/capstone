@@ -91,3 +91,7 @@ class DuckRepository:
             value_list.append(v[0])
         value_list.sort()
         return value_list
+
+    def alter_table_name(self, oldname, newname):
+        sql = "ALTER TABLE %s RENAME to %s" % (oldname, newname)
+        self.execute_without_result(sql)

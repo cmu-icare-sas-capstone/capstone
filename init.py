@@ -24,11 +24,11 @@ logger.debug(meta_data_repo)
 logger.debug(state.get("meta_data_repo"))
 
 # add meta data repo
-create_table = "CREATE TABLE metadata(name TEXT, values TEXT, dimensions TEXT)"
+create_table = "CREATE TABLE metadata(name TEXT, values TEXT, dimensions TEXT, size BIGINT)"
 repo.execute_without_result(create_table)
 create_table = "CREATE TABLE view(table_name TEXT, view_name TEXT, values TEXT, rules TEXT)"
 repo.execute_without_result(create_table)
-create_table = "CREATE TABLE comment_table(table_name TEXT)"
+create_table = "CREATE TABLE comment_table(table_name TEXT, size BIGINT)"
 repo.execute_without_result(create_table)
 
 logger.debug("adding default processing service")
@@ -64,3 +64,5 @@ elif app_config.env == "test":
             ["age_group, race, facility_id, ccs_diagnosis_description"],
             ["length_of_stay", "total_costs", "long_stay"]
         )
+        df = pd.read_pickle("./data/pickles/clean_test")
+        repo.save_df(df, "default_data_clean_model")

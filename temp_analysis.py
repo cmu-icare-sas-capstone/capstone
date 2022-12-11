@@ -107,17 +107,25 @@
 # #        'apr_mdc_code_18', 'apr_mdc_code_2', 'apr_mdc_code_24',
 # #        'apr_mdc_code_5', 'apr_mdc_code_8', 'apr_mdc_code_9']
 #
+# import pandas as pd
+# import matplotlib.pyplot as plt
+# import seaborn as sns
+# df = pd.read_pickle("app_data")
+# df = df.astype(float)
+# print(df.dtypes)
+# corrM1 = df.corr()
+# corrM = corrM1[['total_costs', 'length_of_stay']]
+# corrM1 = df.corr()
+# pd.set_option("display.max_columns", None)
+# fig, ax = plt.subplots(figsize=(10, 30))
+# sns.heatmap(corrM, annot=True)
+# plt.title(' TOTAL_COSTS                     LENGTH_OF_STAY')
+# fig.show()
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-df = pd.read_pickle("app_data")
-df = df.astype(float)
+from repository.Repository import Repository
+import configuration.AppConfiguration as app_config
+from configuration.DuckDbConfiguration import duckdb_configuration
+repo = Repository(app_config, duckdb_configuration.get_connection())
+df = pd.read_csv("data/files/CMS_PUBLIC_COMMENTS_2022_7-9.csv")
 print(df.dtypes)
-corrM1 = df.corr()
-corrM = corrM1[['total_costs', 'length_of_stay']]
-corrM1 = df.corr()
-pd.set_option("display.max_columns", None)
-fig, ax = plt.subplots(figsize=(10, 30))
-sns.heatmap(corrM, annot=True)
-plt.title(' TOTAL_COSTS                     LENGTH_OF_STAY')
-fig.show()
+repo.save_df(df, "comment")

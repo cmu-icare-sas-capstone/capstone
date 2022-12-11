@@ -20,6 +20,14 @@ clean rules: {
 
 
 class DefaultProcessService(ProcessService):
+    COMMENTS_CLEAN_RULES = {
+        "columns": ["Comment"],
+        "rename": {},
+        "retype": {},
+        "filters": {},
+        "revert_filters": {},
+        "drop_null": [],
+    }
     CLEAN_RULES = {
         "columns": ["Facility Id", "Age Group", "Zip Code - 3 digits", "Gender",
                     "Race", "Ethnicity", "Length of Stay", "Type of Admission",
@@ -185,3 +193,10 @@ class DefaultProcessService(ProcessService):
 
         self.repo.save_df(df, df_name+"_model")
         progress_bar.progress(100)
+
+    def extract_comments(self, df_name):
+        exist = self.repo.exists_table(df_name + "_clean")
+        if exist:
+            return df_name + "_clean"
+        super(DefaultProcessService, self).clean(df_name, self.COMMENTS_CLEAN_RULES)
+
