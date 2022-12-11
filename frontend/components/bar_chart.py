@@ -45,19 +45,22 @@ def create_bar_chart(cube):
             if cube_values[i] == "length_of_stay":
                 fig.add_shape(type="line",
                               xref="paper",
-                              x0=0, y0=5.150, x1=1, y1=5.150,
+                              x0=-1, y0=5.150, x1=1, y1=5.150,
                               line=dict(
-                                  color="blue",
                                   dash="dash"
-                              ),)
+                              ),
+                              row=int(i / 2 + 1),
+                              col=int(i % 2 + 1)
+                              )
             if cube_values[i] == "total_costs":
                 fig.add_shape(type="line",
                               xref="paper",
-                              x0=0, y0=12900, x1=1, y1=12900,
+                              x0=-1, y0=12900, x1=1, y1=12900,
                               line=dict(
-                                  color="red",
                                   dash="dash"
                               ),
+                              row=int(i / 2 + 1),
+                              col=int(i % 2 + 1)
                               )
 
         fig.update_layout(barmode="group")

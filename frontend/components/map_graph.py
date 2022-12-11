@@ -54,4 +54,4 @@ def create_map(df):
     lat, lon = df.loc[0, "latitude"], df.loc[0, "longitude"]
     m = folium.Map([lat, lon], tiles='cartodbpositron', zoom_start=9)
     HeatMap(map_df).add_to(m)
-    components.html(m._repr_html_(), width=800, height=600)
+    components.html(m._repr_html_(), width=600, height=600)
