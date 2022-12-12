@@ -32,6 +32,9 @@ def create_bar_chart(cube):
     elif cal_selection_box == "Std":
         fig_df = groups.std().loc[:, cube_values]
 
+    if group_by_selection_box == "facility_id":
+        fig_df.index = [x.replace(".0", "\0") for x in fig_df.index]
+
     graph_col, description_col = st.columns([3, 2])
     with graph_col:
         fig = plotly.subplots.make_subplots(rows=2, cols=2)
@@ -42,17 +45,27 @@ def create_bar_chart(cube):
                 col=int(i % 2 + 1)
             )
 
+            if cube_values[i] == "length_of_stay":
+                fig.add_shape(type="line",
+                              xref="paper",
+                              x0=-1, y0=5.150, x1=1, y1=5.150,
+                              line=dict(
+                                  dash="dash"
+                              ),
+                              row=int(i / 2 + 1),
+                              col=int(i % 2 + 1)
+                              )
+            if cube_values[i] == "total_costs":
+                fig.add_shape(type="line",
+                              xref="paper",
+                              x0=-1, y0=12900, x1=1, y1=12900,
+                              line=dict(
+                                  dash="dash"
+                              ),
+                              row=int(i / 2 + 1),
+                              col=int(i % 2 + 1)
+                              )
+
         fig.update_layout(barmode="group")
         fig.update_yaxes(showgrid=False)
-
         st.plotly_chart(fig)
-
-        # if fig_selection_box == "Pie Chart" and cal_selection_box == "Count":
-        #     fig = go.Figure(
-        #         data=[
-        #             go.Pie(labels=fig_df.index, values=fig_df.iloc[:, 0])
-        #         ]
-        #     )
-        #     fig.update_traces(hole=.4, hoverinfo="label+percent+name")
-        #     fig.update_layout(title_text=cube.cube_name)
-        #     st.plotly_chart(fig)

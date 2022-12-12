@@ -96,19 +96,55 @@ df['age_group'] = df['age_group'].map(enc_age_dict) #
 #     normalize=True,
 #     transform_target=True
 # )
-X = df.iloc[:, 2:-1]
-print(X.columns)
-y = df['total_costs']
-y = np.log2(y)
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42)
+# X = df.iloc[:, 2:-1]
+# print(X.columns)
+# y = df['total_costs']
+# y = np.log2(y)
+# X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42)
+#
+# lr_model = LinearRegression()
+# lr_model.fit(X_train, y_train)
+# print(X.columns)
+# pickle.dump(lr_model, open('model/lr_model_cost.pkl', 'wb'))
+# y_pred = lr_model.predict(X_test)
+# print("Training R-squared: ", lr_model.score(X_train,y_train))
+# print("Testing R-squared: ", lr_model.score(X_test,y_test), "\n")
+#
+# print("Training MAE", mean_absolute_error(y_train, lr_model.predict(X_train)) )
+# print("Test MAE:", mean_absolute_error(y_test, lr_model.predict(X_test)))
 
-lr_model = LinearRegression()
-lr_model.fit(X_train, y_train)
-print(X.columns)
-pickle.dump(lr_model, open('model/lr_model_cost.pkl', 'wb'))
-y_pred = lr_model.predict(X_test)
-print("Training R-squared: ", lr_model.score(X_train,y_train))
-print("Testing R-squared: ", lr_model.score(X_test,y_test), "\n")
 
-print("Training MAE", mean_absolute_error(y_train, lr_model.predict(X_train)) )
-print("Test MAE:", mean_absolute_error(y_test, lr_model.predict(X_test)))
+import tensorflow as tf
+
+from tensorflow import keras
+from keras import layers
+train_dataset = df.sample(frac=0.8, random_state=0)
+test_dataset = df.drop(train_dataset.index)
+train_features = train_dataset.copy()
+test_features = test_dataset.copy()
+print(test_features)
+
+train_labels = train_features.pop('total_costs')
+test_labels = test_features.pop('total_costs')
+normalizer = tf.keras.layers.Normalization(axis=-1)
+train_features = train_features.astype("float32")
+normalizer.adapt(np.array(train_features))
+
+
+def build_and_compile_model(norm):
+  model = keras.Sequential([
+      norm,
+      layers.Dense(64, activation='relu'),
+      layers.Dense(64, activation='relu'),
+      layers.Dense(1)
+  ])
+
+  model.compile(loss='mean_absolute_error',
+                optimizer=tf.keras.optimizers.Adam(0.001))
+  return model
+
+
+dnn_model = build_and_compile_model(normalizer)
+tf.keras.models.save_model(dnn_model, filepath='model/dnn_model.h5')
+dnn_model = tf.keras.models.load_model('model/dnn_model.h5')
+print(dnn_model.summary())
