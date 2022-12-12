@@ -43,10 +43,24 @@ def model_section(dataset):
 
     model = st.selectbox(
         label="Model",
-        options=("Ridge", "Linear")
+        options=("Linear", )
+    )
+
+    predict_option = st.selectbox(
+        label="Predict Value",
+        options=("Length of Stay", "Cost")
     )
 
     with st.expander("Model Input"):
+        if predict_option == "Cost":
+            length_of_stay = st.slider(
+                "Length of Stay",
+                min_value=0,
+                max_value=120,
+                step=1,
+                label_visibility="visible"
+            )
+
         age_group = st.selectbox(
             label="age_group",
             options=("0-17", "18-44", "45-64", "65-74", "75+")
@@ -207,51 +221,58 @@ def model_section(dataset):
     x = x.fillna(0)
 
     sigma = 0
+    predict_value = 0
     f = None
     f_c = None
-    if model == "Ridge":
-        sigma = 9.74
-        with open("./model/ridge.pkl", 'rb') as file:
-            f = pickle.load(file)
-    # elif model == "XGBoost":
-    #     sigma = 16.91
-    #     with open("./model/xgb_model.pkl", 'rb') as file:
-    #         f = pickle.load(file)
-    elif model == "Linear":
-        sigma = 9.74
-        sigma_cost = 0.54
+    lower_bound = 0
+    upper_bound = 0
+
+    if model == "Linear":
         with open("./model/lr_model.pkl", 'rb') as file:
             f = pickle.load(file)
         with open("./model/lr_model_cost.pkl", "rb") as file:
             f_c = pickle.load(file)
 
-    predict_value = f.predict(x)
-    predict_costs = None
-    if f_c is not None:
-        x.insert(0, "length_of_stay", predict_value)
-        predict_costs_log = f_c.predict(x)
-        predict_costs = math.pow(2, predict_costs_log)
+    elif model == "Neural Network":
+        with open("./model/dnn_model.pkl", "rb") as file:
+            f_c = pickle.load(file)
 
-    if predict_value < 0:
-        predict_value = 0
+    if predict_option == "Length of Stay" and f is not None:
+        predict_value = f.predict(x)
+        sigma = 9.74
+        if predict_value < 0:
+            predict_value = 0
+        lower_bound = max(0, predict_value - 1.96 * math.sqrt(sigma))
+        upper_bound = predict_value + 1.96 * math.sqrt(sigma)
+
+    elif predict_option == "Cost" and f_c is not None:
+        x.insert(0, "length_of_stay", length_of_stay)
+        if model == "Linear":
+            predict_value = f_c.predict(x)
+            log_value = predict_value
+            predict_value = math.pow(2, log_value)
+            sigma = 0.54
+            lower_bound = 2 ** max(0, log_value - 1.96 * math.sqrt(sigma))
+            upper_bound = 2 ** (log_value + 1.96 * math.sqrt(sigma))
+        elif model == "Neural Network":
+            x.insert(0, "total_charges", 0)
+            x.insert(0, "total_costs", 0)
+            predict_value = f_c.predict(x).flatten()
+            sigma = 5013.93
+            lower_bound = max(0, predict_value - 1.96 * math.sqrt(sigma))
+            upper_bound = predict_value + 1.96 * math.sqrt(sigma)
 
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.metric("Estimated LOS", value="%.2f" % predict_value)
-        if predict_costs is not None:
-            st.metric("Estimated Costs", value="%.2f" % predict_costs)
+        if predict_option == "Length of Stay":
+            st.metric("Estimated LOS", value="%.2f" % predict_value)
+        elif predict_option == "Cost":
+            st.metric("Estimated Costs", value="%.2f" % predict_value)
     with col2:
         st.metric("MSE", value=sigma)
-        if predict_costs is not None:
-            st.metric("MAE ", value="%.2f" % sigma_cost)
+
     with col3:
-        st.metric("95% Confidence Interval",
-                  value="[%.2f, %.2f]" % (
-                  max(0, predict_value - 1.96 * math.sqrt(sigma)), predict_value + 1.96 * math.sqrt(sigma)))
-        if predict_costs is not None:
-            low_bound = 2**(predict_costs_log - 1.96 * sigma_cost)
-            upper_bound = 2**(predict_costs_log + 1.96*sigma_cost)
-            st.metric("95% Confidence Interval", value="[%.2f, %.2f]" % (low_bound, upper_bound))
+        st.metric("95% Confidence Interval", value="[%.2f, %.2f]" % (lower_bound, upper_bound))
 
     with st.expander("Model Analysis"):
         if model == "ridge":

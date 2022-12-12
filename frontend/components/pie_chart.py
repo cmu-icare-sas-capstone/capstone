@@ -8,7 +8,7 @@ def create_pie_chart(cube):
     with cal_col:
         cal_selection_box = st.selectbox(
             "calculation Method",
-            options=("Count"),
+            options=("Count",),
             key="cube_viewer_val_cal_type_" + cube.cube_name
         )
 
