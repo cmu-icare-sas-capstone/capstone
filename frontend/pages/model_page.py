@@ -158,6 +158,13 @@ def model_section(dataset):
         number_of_physician = st.text_input(label="number of physician", value=25)
         hcc_code = st.text_input(label="HCC Code", value=1.8)
 
+    st.subheader("Intervention")
+    col1, col2 = st.columns([2, 6])
+    with col1:
+        glucose_check = st.checkbox("Glucose Monitor Applied")
+    with col2:
+        st.markdown("*Glucose monitor could potentially reduce the los by 1 day and 50% of admission rate hence reduce the cost*")
+
     columns = ['age_group', 'apr_severity_of_illness_code',
                'sum_countunique_rndrng_npi_physician_other_providers',
                'average_of_bene_avg_risk_scre_2019_physician_other_providers_puf',
@@ -220,6 +227,10 @@ def model_section(dataset):
     }, ignore_index=True)
     x = x.fillna(0)
 
+    for c in x.columns:
+        if c not in columns:
+            x = x.drop(columns=[c])
+
     sigma = 0
     predict_value = 0
     f = None
@@ -265,9 +276,15 @@ def model_section(dataset):
     col1, col2, col3 = st.columns(3)
     with col1:
         if predict_option == "Length of Stay":
-            st.metric("Estimated LOS", value="%.2f" % predict_value)
+            delta_value_los = ""
+            if glucose_check:
+                delta_value_los = "-1"
+            st.metric("Estimated LOS", value="%.2f" % predict_value, delta=delta_value_los)
         elif predict_option == "Cost":
-            st.metric("Estimated Costs", value="%.2f" % predict_value)
+            delta_value_cost = ""
+            if glucose_check:
+                delta_value_cost = ""
+            st.metric("Estimated Costs", value="%.2f" % predict_value, delta=delta_value_cost)
     with col2:
         st.metric("MSE", value=sigma)
 
