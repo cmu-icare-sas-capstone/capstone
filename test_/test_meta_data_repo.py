@@ -13,12 +13,12 @@ def test():
 
 
 def test_add_exists_view(repo, meta_data_repo):
-    sql = "INSERT INTO view VALUES ('default_data_clean', 'test', 'total_costs, length_of_stay', '{}')"
+    sql = "INSERT INTO view VALUES ('default_data_clean', 'test_', 'total_costs, length_of_stay', '{}')"
     logger.debug(sql)
     repo.execute_without_result(sql)
-    sql = "CREATE VIEW test AS SELECT * FROM default_data_clean"
+    sql = "CREATE VIEW test_ AS SELECT * FROM default_data_clean"
     repo.execute_without_result(sql)
-    flag = meta_data_repo.exists_view("test", "default_data_clean")
+    flag = meta_data_repo.exists_view("test_", "default_data_clean")
     print(flag)
 
 

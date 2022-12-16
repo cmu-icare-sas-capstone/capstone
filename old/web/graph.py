@@ -46,13 +46,13 @@ def plot_scatter(data, x, y, height, width, margin, residual=False, title_text=N
                         )
                     )
 
-        # add an annotation with the test R2
+        # add an annotation with the test_ R2
         fig.add_annotation(
                     xref="paper",
                     yref="paper",
                     x=0.57,
                     y=0.98,
-                    text=f"Test R²: {round(r2_score(data.loc[data['split'] == 'test']['Length of Stay'], data.loc[data['split'] == 'test']['prediction']), 3)}",
+                    text=f"Test R²: {round(r2_score(data.loc[data['split'] == 'test_']['Length of Stay'], data.loc[data['split'] == 'test_']['prediction']), 3)}",
                     bordercolor="#c7c7c7",
                     borderwidth=2,
                     borderpad=4,
@@ -86,13 +86,13 @@ def plot_scatter(data, x, y, height, width, margin, residual=False, title_text=N
                         )
                     )
 
-        # add an annotation with the test RMSE
+        # add an annotation with the test_ RMSE
         fig.add_annotation(
                     xref="paper",
                     yref="paper",
                     x=0.56,
                     y=0.89,
-                    text=f"Test RMSE: {round(mean_squared_error(data.loc[data['split'] == 'test']['Length of Stay'], data.loc[data['split'] == 'test']['prediction'], squared=False), 2)}",
+                    text=f"Test RMSE: {round(mean_squared_error(data.loc[data['split'] == 'test_']['Length of Stay'], data.loc[data['split'] == 'test_']['prediction'], squared=False), 2)}",
                     bordercolor="#c7c7c7",
                     borderwidth=2,
                     borderpad=4,

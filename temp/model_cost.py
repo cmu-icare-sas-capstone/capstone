@@ -5,7 +5,7 @@ from scipy import stats
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_absolute_error
-df = pd.read_pickle("data/pickles/data7_0")
+df = pd.read_pickle("../data/pickles/data7_0")
 pd.set_option("display.max_columns", None)
 df = df[df["ccs_diagnosis_description"].str.contains("diabetes", case=False)] #26816 remains
 df = df[~df["ccs_diagnosis_description"].str.contains("pancrea", case=False)]
@@ -145,6 +145,6 @@ def build_and_compile_model(norm):
 
 
 dnn_model = build_and_compile_model(normalizer)
-tf.keras.models.save_model(dnn_model, filepath='model/dnn_model.h5')
+tf.keras.models.save_model(dnn_model, filepath='../model/dnn_model.h5')
 dnn_model = tf.keras.models.load_model('model/dnn_model.h5')
 print(dnn_model.summary())

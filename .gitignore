@@ -5,4 +5,4 @@ data
 *.pyc
 *.jar
 .git.bfg-report/
-temp_analysis.py
+temp/temp_analysis.py

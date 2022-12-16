@@ -1,10 +1,11 @@
+import pickle
+
 import pandas as pd
 
-from frontend.components.BubbleChart import BubbleChart
 import matplotlib.pyplot as plt
 import streamlit as st
-import random
 from wordcloud import WordCloud
+from wordcloud import STOPWORDS
 from bean.GlobalState import state
 import numpy as np
 from collections import Counter
@@ -15,67 +16,88 @@ output_notebook()
 from bokeh.models import HoverTool
 from bokeh.models import ColumnDataSource
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
+import spacy
+from spacy.tokens import Doc
+from nltk.stem import WordNetLemmatizer
+from nltk.tokenize import TweetTokenizer
+import string
+from sklearn.decomposition import TruncatedSVD
+from sklearn.preprocessing import Normalizer
+import codecs
+from sklearn.manifold import TSNE
+import re
 from keybert import KeyBERT
+
+
 repo = state.get("repo")
 
 
 def create_nlp_page():
+    sql = "SELECT table_name FROM comment_table"
+    comment_sets = repo.execute(sql)
+    comment_sets = comment_sets.iloc[:, 0].tolist()
+    comment_set = st.selectbox(
+        label="Comment set",
+        options=comment_sets,
+    )
+
     show_option = st.selectbox(
         label="",
         options=("Key Phrases", "Topic Modeling On All Comments", "Topic Modeling On Recommendations", "KeyBert")
     )
+    df = pd.DataFrame()
+    if comment_set is not None:
+        df = repo.read_df(comment_set)
 
-    keywords = [('services', 33062), ('cms', 28732), ('patients', 22148), ('health', 19614), ('care', 18837),
-                ('medicare', 17899), ('access', 16054), ('cuts', 15917), ('management', 15208), ('therapy', 13823),
-                ('codes', 13292), ('proposed', 12376), ('psychologists', 10412), ('reimbursement', 9869),
-                ('patient', 9028), ('behavioral', 8573), ('supervision', 8560), ('training', 8245), ('support', 8071),
-                ('treatment', 7927)]
+    st.markdown("It may take up to 15 minutes to run the NLP engine on the dataset, "
+                "it need to be run on every new comments set once")
+    if st.button("Run NLP Engine"):
+        with st.spinner("Running NLP Engine"):
+            df = df.dropna(thresh=df.shape[0] * 0.8, axis=1)  # 43 columns dropped
+            df = df.dropna(how="all", axis=1)
 
-    key_phrases = [('psychological services medicare', 0.6466),
-                   ('psychotherapeutic services medicare', 0.637),
-                   ('services cms medicare', 0.6348),
-                   ('cms proposed medicare', 0.6247),
-                   ('medicare requests cms', 0.6243),
-                   ('utilize cms medicare', 0.6241),
-                   ('medicare cms regarding', 0.6137),
-                   ('medicare program cms', 0.6135),
-                   ('cms behavioral health', 0.6134),
-                   ('cms strengthen medicare', 0.6116),
-                   ('outpatient services cms', 0.6098),
-                   ('provide behavioral healthcare', 0.6083),
-                   ('cms understanding medicare', 0.6074),
-                   ('behavioral healthcare services', 0.6066),
-                   ('cms medicare program', 0.6066),
-                   ('cms beneficiaries outpatient', 0.606),
-                   ('integrated behavioral healthcare', 0.6057),
-                   ('treatment cms policies', 0.6054),
-                   ('medicare clients cms', 0.6049),
-                   ('cms ensure medicare', 0.6036)]
-    key_phrases_dict = {}
-    for t in key_phrases:
-        key_phrases_dict[t[0]] = t[1]
+            # drop rows where there is no comment
+            df = df.dropna(subset=['comment'])
 
-    if show_option == "Key Phrases":
-        cloud = WordCloud(max_font_size=50, max_words=100, background_color="white")\
-            .generate_from_frequencies(key_phrases_dict)
-        fig, ax = plt.subplots()
-        plt.title("All Comments - Wordcloud")
-        plt.imshow(cloud, interpolation="bilinear")
-        plt.axis("off")
-        st.pyplot(plt)
-    elif show_option == "Topic Modeling On All Comments":
-        draw_tsne_graph_on_comments()
-    elif show_option == "Topic Modeling On Recommendations":
-        draw_tsne_graph_on_comments("_recom")
-    elif show_option == "KeyBert":
-        create_keybert_table()
+            # Delete duplicate rows based on specific columns
+            df.drop_duplicates(subset=["comment"], keep='first', inplace=True)
+
+            # tsne
+            comments = df.loc[:, "comment"]
+            run_nlp(comments, comment_set)
+
+            # tsne recommend
+            # Create a regular expression pattern that matches any of the specified search strings
+            pattern = re.compile("urge|recommend|advise", re.IGNORECASE)
+            # filter dataset to include only comments with intention of making recommendations
+            recommend_df = comments[comments.str.contains(pattern)]
+            run_nlp(recommend_df, comment_set, "recomm")
+
+            sql = "UPDATE comment_table SET status = true WHERE table_name = '%s'" % comment_set
+            repo.execute_without_result(sql)
+
+    sql = "SELECT status FROM comment_table WHERE table_name = '%s'" % comment_set
+    status = repo.execute_without_result(sql).fetchone()
+    if status is not None:
+        status = status[0]
+
+    if status:
+        if show_option == "Key Phrases":
+            run_wordcloud(df)
+        elif show_option == "Topic Modeling On All Comments":
+            draw_tsne_graph_on_comments(comment_set=comment_set)
+        elif show_option == "Topic Modeling On Recommendations":
+            draw_tsne_graph_on_comments(comment_set=comment_set, postfix="recomm")
+        elif show_option == "KeyBert":
+            create_keybert_table(comment_set)
 
 
-def draw_tsne_graph_on_comments(comments_set=""):
+def draw_tsne_graph_on_comments(comment_set="", postfix=""):
     import pickle
 
-    with open("./model/processed_comments" + comments_set + ".pkl", 'rb') as file:
-        processed_comments = pickle.load(file)
+    sql = "SELECT file FROM pickle WHERE name='%s'" % (comment_set + "_processed_comments_" + postfix)
+    res = repo.execute_without_result(sql).fetchone()[0]
+    processed_comments = pickle.loads(codecs.decode(res, "base64"))
 
     tf_vectorizer = CountVectorizer()
     tf_vectorizer.fit(processed_comments)
@@ -85,13 +107,14 @@ def draw_tsne_graph_on_comments(comments_set=""):
 
     n_topics = 8
 
-    import pickle
+    sql = "SELECT file FROM pickle WHERE name='%s'" % (comment_set + "_svdMatrix_" + postfix)
+    res = repo.execute_without_result(sql).fetchone()[0]
+    svdMatrix = pickle.loads(codecs.decode(res, "base64"))
 
-    with open("./model/svdMatrix" + comments_set + ".pkl", 'rb') as file:
-        svdMatrix = pickle.load(file)
+    sql = "SELECT file FROM pickle WHERE name='%s'" % (comment_set + "_tsne_lsa_vectors_" + postfix)
+    res = repo.execute_without_result(sql).fetchone()[0]
+    tsne_lsa_vectors = pickle.loads(codecs.decode(res, "base64"))
 
-    with open("./model/tsne_lsa_vectors" + comments_set + ".pkl", "rb") as file:
-        tsne_lsa_vectors = pickle.load(file)
 
     def get_keys(topic_matrix):
         '''returns an integer list of predicted topic categories for a given topic matrix'''
@@ -197,10 +220,119 @@ def draw_tsne_graph_on_comments(comments_set=""):
 
 # Title: Topics of public comments (Recommendation)
 
-def create_keybert_table():
-    import pickle
-    with open("./model/keywords_comments.pkl", 'rb') as file:
-        processed_comments = pickle.load(file)
 
-    df = pd.DataFrame(data=processed_comments, columns=["Keyword", "Weight"])
+def create_keybert_table(comment_set):
+    import pickle
+
+    sql = "SELECT file FROM pickle WHERE name='%s'" % (comment_set + "_keywords_comments")
+    res = repo.execute_without_result(sql).fetchone()[0]
+    keywords_comments = pickle.loads(codecs.decode(res, "base64"))
+
+    df = pd.DataFrame(data=keywords_comments, columns=["Keyword", "Weight"])
     st.table(df)
+
+
+def run_wordcloud(df):
+    stop_words = ["https", "co", "RT"] + list(STOPWORDS)
+    wordcloud = WordCloud(max_font_size=50, max_words=100, background_color="white", stopwords=stop_words,
+                          collocation_threshold=3).generate(str(df))
+    fig, ax = plt.subplots()
+    plt.title("All Comments - Wordcloud")
+    plt.imshow(wordcloud, interpolation="bilinear")
+    plt.axis("off")
+    st.pyplot(plt)
+
+
+def run_nlp(comments, comment_set, postfix=""):
+    print(comments)
+    processed_comments = process_comments(comments)
+    processed_comments_encoded = codecs.encode(pickle.dumps(processed_comments), "base64").decode()
+
+    sql = "INSERT INTO pickle VALUES ('%s', '%s')" % (comment_set+"_processed_comments_"+postfix, processed_comments_encoded)
+
+    repo.execute_without_result(sql)
+    # # sql = "SELECT file FROM pickle WHERE name = '%s'" % (comment_set+"_processed_comments")
+    # # res = repo.execute_without_result(sql).fetchone()[0]
+    # # processed_comments = pickle.loads(codecs.decode(res.encode(), "base64"))
+    #
+    #
+    tf_vectorizer = CountVectorizer()
+    tf_vectorizer.fit(processed_comments)
+    dtm_tf = tf_vectorizer.transform(processed_comments)
+
+    # term-frequency inverse document frequency (TF-IDF) matrix
+    # TF-IDF is better at identifying words that are more indicative of the content of a particular comment
+    tfidf_vectorizer = TfidfVectorizer(**tf_vectorizer.get_params())
+    dtm_tfidf = tfidf_vectorizer.fit_transform(processed_comments)
+
+    n_topics = 8
+    # Singular Value Decomposition
+    svd = TruncatedSVD(n_components=n_topics)
+    svdMatrix = svd.fit_transform(dtm_tfidf)
+    svdMatrix = Normalizer(copy=False).fit_transform(svdMatrix)
+    svdMatrix_encoded = codecs.encode(pickle.dumps(svdMatrix), "base64").decode()
+    sql = "INSERT INTO pickle VALUES ('%s', '%s')" % (comment_set + "_svdMatrix_" + postfix, svdMatrix_encoded)
+    repo.execute_without_result(sql)
+
+    # Initialize TSNE
+    tsne_lsa_model = TSNE(n_components=2, perplexity=50, learning_rate=100,
+                          n_iter=2000, verbose=False, random_state=3, angle=0.75)
+    tsne_lsa_vectors = tsne_lsa_model.fit_transform(svdMatrix)
+    tsne_lsa_vectors_encoded = codecs.encode(pickle.dumps(tsne_lsa_vectors), "base64").decode()
+    sql = "INSERT INTO pickle VALUES ('%s', '%s')" % (comment_set + "_tsne_lsa_vectors_" + postfix, tsne_lsa_vectors_encoded)
+    repo.execute_without_result(sql)
+
+    extract_keywords(comments, comment_set)
+    return
+
+
+def process_comments(df):
+    '''
+    Process the comments from the given dataframe
+    '''
+    comments = df.to_numpy() # extract all comments into an array
+    tknzr = TweetTokenizer()
+    nlp = spacy.load("en_core_web_sm") # NLP for english
+    lemmatizer = WordNetLemmatizer()
+
+    # customized a class for tweet tokenizer
+    def tweet_tokenize(x):
+        return Doc(nlp.vocab, words = tknzr.tokenize(x))
+
+    # set our nlp pipeline with tokenizer specialized for tweets
+    nlp.tokenizer = tweet_tokenize
+
+    processed_comments = []
+    remove_words = ['<br/>']
+
+    # loop over each comment
+    for comment in comments:
+
+        processed_comment = []
+
+        # Convert comment into Doc object with a sequence of tokens
+        for token in nlp(str(comment).lower()):
+            if token.text in nlp.Defaults.stop_words or 'http' in token.text or token.text in string.punctuation or len(token.text) < 2 or token.text in remove_words: # remove stop words
+                continue
+            else:
+                processed_comment.append(lemmatizer.lemmatize(token.text))
+
+        processed_comments.append(' '.join(processed_comment))
+
+    return processed_comments
+
+def extract_keywords(df, comment_set):
+   '''
+   Extract keywords based on KeyBERT from the provided dataframe
+   '''
+   kw_model = KeyBERT()
+   # Extract keywords from all comments
+   all_comments = ""
+   for i in range(0, len(df)):
+      all_comments  = all_comments  + " " + str(df.iloc[i])
+
+   keywords_comments = kw_model.extract_keywords(all_comments,keyphrase_ngram_range=(1, 2), stop_words=None)
+   keywords_comments_encoded = codecs.encode(pickle.dumps(keywords_comments), "base64").decode()
+   sql = "INSERT INTO pickle VALUES ('%s', '%s')" % (comment_set + "_keywords_comments", keywords_comments_encoded)
+   repo.execute_without_result(sql)
+   return
