@@ -1,44 +1,28 @@
-# Important
-Please check requirements.txt file to install missing packages if there's any. Make sure you update that list when you add new third-party packages.
-
-These codes add the project capstone path to you working environment (spider, jupiter, etc.), so you can use self created packages that locate in this project. Please change the absolute path to your local capstone path.
-```python
-import sys
-sys.path.extend(['absolute path'])
+# Setup the environment
+**Recommend do this in a separate environment to avoid conflicts**
 ```
-
-remote server address: http://216.128.148.102:8081/
-
-Add a folder with name data and a subfolder called pickles under it. After the first read from the database, it will create a zip format dataframe to save some time.
-# Database IO
-
-```python
-# after you include the project path
-import old.l1.etl.DatabaseIO as dbio
-
-# read from the databaase
-dbio.read_from_db("table_name")
-
-# write to database 
-# This should be done after cleaning
-# check
-#     1. valid table name
-#     2. valid column name
-#     3. data type if needed
-# threads_num = number of lines of dataframe / 5000
-
-dbio.write_to_db(df, "table_name", threads_num)
+bash setup.sh
 ```
+Or run each commands of the bash file
+```
+pip install -r requirements.txt
+python -m spacy download en_core_web_lg
+python -m spacy download en_core_web_sm
+python -m spacy download en
+```
+# Run the Application
+**In the root of the project directory**
+```
+streamlit run main.py --server.maxUploadSize 2000
+```
+Or 
 
-# Database Setup
-Connect through workbench or any others use this information
-connection type: standard TCP
-host = 216.128.148.102
+Using the test environment with the following steps, this will load some default files
 
-port = 3306
-
-database = capstone
-
-username = root
-
-password = ?2?QaB%,s?F7A8Jrs/+4bh0^vn1R77pt
+1. Under the root directory of the project create a data/pickles folder
+2. Put these three pickles into the pickles folder: clean_test, data7_0, test_data
+3. Change env variable in file configuration/AppConfiguration.py to test
+4. Run the following command
+```
+streamlit run main.py --server.maxUploadSize 2000
+```

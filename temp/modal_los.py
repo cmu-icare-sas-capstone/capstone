@@ -19,7 +19,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 import pickle
 
 
-df = pd.read_pickle("data/pickles/data7_0")
+df = pd.read_pickle("../data/pickles/data7_0")
 pd.set_option("display.max_columns", None)
 df.describe()
 df = df[df["ccs_diagnosis_description"].str.contains("diabetes", case=False)] #26816 remains

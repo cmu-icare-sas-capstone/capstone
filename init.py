@@ -28,7 +28,9 @@ create_table = "CREATE TABLE metadata(name TEXT, values TEXT, dimensions TEXT, s
 repo.execute_without_result(create_table)
 create_table = "CREATE TABLE view(table_name TEXT, view_name TEXT, values TEXT, rules TEXT)"
 repo.execute_without_result(create_table)
-create_table = "CREATE TABLE comment_table(table_name TEXT, size BIGINT)"
+create_table = "CREATE TABLE comment_table(table_name TEXT, size BIGINT, status BOOLEAN)"
+repo.execute_without_result(create_table)
+create_table = "CREATE TABLE pickle(name TEXT, file BLOB)"
 repo.execute_without_result(create_table)
 
 logger.debug("adding default processing service")
@@ -45,24 +47,26 @@ if app_config.env == "dev" and app_config.process_default_data:
         default_process_service.process("default_data")
         meta_data_repo.add_meta_data(
             table_name+"_clean",
-            ["age_group, race, facility_id, ccs_description_description"],
-            ["length_of_stay", "total_costs", "long_stay"]
+            ["age_group, race, facility_id, ccs_description_description", "gender"],
+            ["length_of_stay", "total_costs", "long_stay"],
+            1000000
         )
         df = repo.read_df("default_data_clean")
         df.to_pickle("data7_0")
 
 
 elif app_config.env == "test":
-    logger.debug("env: test, process default data: true")
+    logger.debug("env: test_, process default data: true")
     if not repo.exists_table("default_data_clean"):
         logger.debug("loading default data")
         table_name = "default_data_clean"
-        df = pd.read_pickle("./data/pickles/test_data")
+        df = pd.read_pickle("data/pickles/test_data")
         repo.save_df(df, "default_data_clean")
         meta_data_repo.add_meta_data(
             table_name,
-            ["age_group, race, facility_id, ccs_diagnosis_description"],
-            ["length_of_stay", "total_costs", "long_stay"]
+            ["age_group, race, facility_id, ccs_diagnosis_description, gender"],
+            ["length_of_stay", "total_costs", "long_stay"],
+            1000000
         )
-        df = pd.read_pickle("./data/pickles/clean_test")
+        df = pd.read_pickle("data/pickles/clean_test")
         repo.save_df(df, "default_data_clean_model")

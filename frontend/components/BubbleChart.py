@@ -97,7 +97,7 @@ class BubbleChart:
                         dir_vec = dir_vec / np.sqrt(dir_vec.dot(dir_vec))
                         # calculate orthogonal vector
                         orth = np.array([dir_vec[1], -dir_vec[0]])
-                        # test which direction to go
+                        # test_ which direction to go
                         new_point1 = (self.bubbles[i, :2] + orth *
                                       self.step_dist)
                         new_point2 = (self.bubbles[i, :2] - orth *

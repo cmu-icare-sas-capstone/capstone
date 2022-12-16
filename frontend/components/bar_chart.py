@@ -39,6 +39,7 @@ def create_bar_chart(cube):
     with graph_col:
         fig = plotly.subplots.make_subplots(rows=2, cols=2)
         for i in range(0, len(cube_values)):
+            fig_df.iloc[:, i] = round(fig_df.iloc[:, i], 2)
             fig.add_trace(
                 go.Bar(name=cube_values[i], x=fig_df.index, y=fig_df.iloc[:, i], yaxis="y"+str(i+1), offsetgroup=i+1),
                 row=int(i / 2 + 1),
@@ -48,7 +49,7 @@ def create_bar_chart(cube):
             if cube_values[i] == "length_of_stay":
                 fig.add_shape(type="line",
                               xref="paper",
-                              x0=-1, y0=5.150, x1=1, y1=5.150,
+                              x0=-1, y0=5.150, x1=len(fig_df), y1=5.150,
                               line=dict(
                                   dash="dash"
                               ),
@@ -58,7 +59,7 @@ def create_bar_chart(cube):
             if cube_values[i] == "total_costs":
                 fig.add_shape(type="line",
                               xref="paper",
-                              x0=-1, y0=12900, x1=1, y1=12900,
+                              x0=-1, y0=12900, x1=len(fig_df), y1=12900,
                               line=dict(
                                   dash="dash"
                               ),

@@ -63,11 +63,15 @@ def structured_data_section():
         table_new_name = st.text_input(label="table_name", value=cleaned_table_name)
         dimensions = st.multiselect(
             label="Select data dimensions",
-            options=meta_data_repo.get_table_columns(cleaned_table_name)
+            options=meta_data_repo.get_table_columns(cleaned_table_name),
+            default=["facility_id", "age_group", 'gender', "race", "ethnicity", "ccs_diagnosis_description"
+                , "apr_drg_description", "type_of_admission", "patient_disposition", "apr_mdc_description"
+                , "apr_severity_of_illness_description", "payment_typology_1", "area_name","lat", "lon"]
         )
         values = st.multiselect(
             label="Select data values",
-            options=meta_data_repo.get_table_columns(cleaned_table_name)
+            options=meta_data_repo.get_table_columns(cleaned_table_name),
+            default=["length_of_stay", "total_costs", "long_stay"]
         )
         confirm_table = st.button(label="confirm")
         if confirm_table:
@@ -114,7 +118,7 @@ def comments_file_section():
         size = session_state.get(comment_file+"_size")
         table_new_name = st.text_input(label="comments set name", value="public_comments_clean")
         if st.button("Confirm"):
-            sql = "INSERT INTO comment_table VALUES ('%s', %s)" % (table_new_name, size)
+            sql = "INSERT INTO comment_table VALUES ('%s', %s, %s)" % (table_new_name, size, False)
             repo.execute(sql)
             repo.alter_df_name("public_comments_clean", table_new_name)
 
