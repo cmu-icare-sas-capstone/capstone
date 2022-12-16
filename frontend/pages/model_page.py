@@ -23,11 +23,11 @@ def create_model_page():
 
 
 def model_section(dataset):
+    if not repo.exists_table(dataset + "_model"):
+        with st.spinner("Running feature engineering of models"):
+            model_feature_eng_progress_bar = st.progress(0)
+            default_process_service.model_feature_eng(dataset, model_feature_eng_progress_bar)
     with st.expander("Variables Correlation"):
-        if not repo.exists_table(dataset+"_model"):
-            with st.spinner("Running feature engineering of models"):
-                model_feature_eng_progress_bar = st.progress(0)
-                default_process_service.model_feature_eng(dataset, model_feature_eng_progress_bar)
                 # add CorreM.
         df = repo.read_df(dataset + "_model")
         df = df.astype(float)

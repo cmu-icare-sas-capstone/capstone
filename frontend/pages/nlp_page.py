@@ -251,11 +251,7 @@ def run_nlp(comments, comment_set, postfix=""):
     sql = "INSERT INTO pickle VALUES ('%s', '%s')" % (comment_set+"_processed_comments_"+postfix, processed_comments_encoded)
 
     repo.execute_without_result(sql)
-    # # sql = "SELECT file FROM pickle WHERE name = '%s'" % (comment_set+"_processed_comments")
-    # # res = repo.execute_without_result(sql).fetchone()[0]
-    # # processed_comments = pickle.loads(codecs.decode(res.encode(), "base64"))
-    #
-    #
+
     tf_vectorizer = CountVectorizer()
     tf_vectorizer.fit(processed_comments)
     dtm_tf = tf_vectorizer.transform(processed_comments)
