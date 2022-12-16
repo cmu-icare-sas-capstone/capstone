@@ -6,6 +6,8 @@ from repository.MetaDataRepository import MetaDataRepository
 import configuration.AppConfiguration as app_config
 import pandas as pd
 from bean.GlobalState import state
+import pickle
+import codecs
 
 
 logger = get_logger(__name__)
@@ -70,3 +72,44 @@ elif app_config.env == "test":
         )
         df = pd.read_pickle("data/pickles/clean_test")
         repo.save_df(df, "default_data_clean_model")
+    if not repo.exists_table("default_comments"):
+        comments = pd.read_pickle("data/pickles/default_comments")
+        comments = pd.DataFrame(comments)
+        repo.save_df(comments, "default_comments")
+        sql = "INSERT INTO comment_table VALUES ('%s', %s, %s)" % ("default_comments", 90000000, True)
+        repo.execute(sql)
+
+        processed_comments = pickle.load(open("./model/processed_comments.pkl", 'rb'))
+        processed_comments_encoded = codecs.encode(pickle.dumps(processed_comments), "base64").decode()
+        sql = "INSERT INTO pickle VALUES ('%s', '%s')" % ("default_comments" + "_processed_comments_", processed_comments_encoded)
+        repo.execute(sql)
+
+        processed_comments_recomm = pickle.load(open("./model/processed_comments_recom.pkl", 'rb'))
+        processed_comments_recomm_encoded = codecs.encode(pickle.dumps(processed_comments_recomm), "base64").decode()
+        sql = "INSERT INTO pickle VALUES ('%s', '%s')" % ("default_comments" + "_processed_comments_" + "recomm", processed_comments_recomm_encoded)
+        repo.execute(sql)
+
+        svdMatrix_encoded = pickle.load(open("./model/svdMatrix.pkl", 'rb'))
+        svdMatrix_encoded = codecs.encode(pickle.dumps(svdMatrix_encoded), "base64").decode()
+        sql = "INSERT INTO pickle VALUES ('%s', '%s')" % ("default_comments" + "_svdMatrix_", svdMatrix_encoded)
+        repo.execute_without_result(sql)
+
+        svdMatrix_encoded = pickle.load(open("./model/svdMatrix_recom.pkl", 'rb'))
+        svdMatrix_encoded = codecs.encode(pickle.dumps(svdMatrix_encoded), "base64").decode()
+        sql = "INSERT INTO pickle VALUES ('%s', '%s')" % ("default_comments" + "_svdMatrix_recomm", svdMatrix_encoded)
+        repo.execute_without_result(sql)
+
+        tsne_lsa_vectors_encoded = pickle.load(open("./model/tsne_lsa_vectors.pkl", 'rb'))
+        tsne_lsa_vectors_encoded = codecs.encode(pickle.dumps(tsne_lsa_vectors_encoded), "base64").decode()
+        sql = "INSERT INTO pickle VALUES ('%s', '%s')" % ("default_comments" + "_tsne_lsa_vectors_", tsne_lsa_vectors_encoded)
+        repo.execute_without_result(sql)
+
+        tsne_lsa_vectors_encoded = pickle.load(open("./model/tsne_lsa_vectors_recom.pkl", 'rb'))
+        tsne_lsa_vectors_encoded = codecs.encode(pickle.dumps(tsne_lsa_vectors_encoded), "base64").decode()
+        sql = "INSERT INTO pickle VALUES ('%s', '%s')" % ("default_comments" + "_tsne_lsa_vectors_recomm", tsne_lsa_vectors_encoded)
+        repo.execute_without_result(sql)
+
+        keywords_comments = pickle.load(open("./model/keywords_comments.pkl", 'rb'))
+        keywords_comments = codecs.encode(pickle.dumps(keywords_comments), "base64").decode()
+        sql = "INSERT INTO pickle VALUES ('%s', '%s')" % ("default_comments" + "_keywords_comments", keywords_comments)
+        repo.execute_without_result(sql)
